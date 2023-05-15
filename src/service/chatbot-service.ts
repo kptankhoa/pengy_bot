@@ -21,10 +21,6 @@ const getMessages = (messages: ChatMessage[], dev: boolean = false) => {
             role: RoleEnum.SYSTEM,
             content: systemMsg
         },
-        {
-            role: RoleEnum.ASSISTANT,
-            content: 'đụ má nứng quá'
-        },
         ...messages
             .map((message, index) => ({
                 ...message,
