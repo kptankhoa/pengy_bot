@@ -8,6 +8,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const BOT_COMMAND = {
     CHAT: new RegExp('^/c +'),
     DEV: new RegExp('^/d'),
+    STAY: new RegExp('^/s'),
     RESET: new RegExp('^/w'),
 }
 
@@ -63,6 +64,27 @@ export const setUpBot = () => {
 
     // handle on call chatbot
     bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => handleIncomingMessage(msg, false));
+    bot.onText(BOT_COMMAND.STAY, async (msg: Message) => {
+        const chatId = msg.chat.id;
+        const chatHistory = chatHistories.get(chatId) || []
+        console.log(`\n\n--------from: chillax remind`);
+        bot.sendChatAction(chatId, 'typing');
+        chatHistory.push({
+            name: msg.from.username,
+            content: 'Stay in Chillax mode',
+            role: RoleEnum.USER
+        });
+        const replyContent = await handleMessage(getMessages(chatHistory, false));
+        console.log('------output------');
+        console.log(`${botName}: ${replyContent}`);
+        bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
+        chatHistory.push({
+            name: botName,
+            content: replyContent,
+            role: RoleEnum.ASSISTANT
+        });
+        chatHistories.set(chatId, chatHistory);
+    });
 
     // handle on dev request
     bot.onText(BOT_COMMAND.DEV, async (msg: Message) => handleIncomingMessage(msg, true));
