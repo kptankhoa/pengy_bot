@@ -25,7 +25,6 @@ export const setUpBot = () => {
             role: RoleEnum.USER
         });
         const replyContent = await handleMessage(chatHistory);
-        console.log({ replyContent })
         chatHistory.push({
             name: botName,
             content: replyContent,
@@ -42,4 +41,6 @@ export const setUpBot = () => {
 
         bot.sendMessage(chatId, 'Cleared', { reply_to_message_id: msg.message_id });
     });
+
+    console.log('---bot is running---')
 };
