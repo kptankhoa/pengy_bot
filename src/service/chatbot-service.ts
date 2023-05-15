@@ -39,7 +39,6 @@ export const setUpBot = () => {
     bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => {
         const chatId = msg.chat.id;
         const chatHistory = chatHistories.get(chatId) || []
-        console.log(msg);
         const chatContent = msg.text.substring(2).trim();
         bot.sendChatAction(chatId, 'typing');
         chatHistory.push({
@@ -49,7 +48,7 @@ export const setUpBot = () => {
         });
         const replyContent = await handleMessage(getMessages(chatHistory));
         console.log('----output----');
-        console.log(`${botName}: ${replyContent}\n`);
+        console.log(`${botName}: ${replyContent}\n\n`);
         bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
         chatHistory.push({
             name: botName,
