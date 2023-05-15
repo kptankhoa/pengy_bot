@@ -1,5 +1,5 @@
-import {botName, postfix, systemMessage, telegramToken} from "../const/const";
-import {Message} from "../model/Message";
+import {botName, postfix, postfixDev, systemMessage, systemMessageDev, telegramToken} from "../const/const";
+import {Message, MessageType} from "../model/Message";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
 import {handleMessage} from "./oa-service";
 
@@ -7,48 +7,55 @@ const TelegramBot = require("node-telegram-bot-api");
 
 const BOT_COMMAND = {
     CHAT: new RegExp('^/c +'),
-    CALL: new RegExp('^/a'),
+    DEV: new RegExp('^/d'),
     RESET: new RegExp('^/w'),
 }
 
 const MESSAGE_LIMIT = 20;
 
-const getMessages = (messages: ChatMessage[]) => {
+const getMessages = (messages: ChatMessage[], dev: boolean = false) => {
+    const systemMsg = dev ? systemMessageDev : systemMessage;
+    const postfix1 = dev ? postfixDev : postfix;
     const returnMsgs = [
         {
             role: RoleEnum.SYSTEM,
-            content: systemMessage
+            content: systemMsg
+        },
+        {
+            role: RoleEnum.ASSISTANT,
+            content: 'đụ má nứng quá'
         },
         ...messages
             .map((message, index) => ({
                 ...message,
-                content: index === messages.length - 1 ? message.content.concat(' ' + postfix) : message.content
+                content: (index === messages.length - 1) ? message.content.concat(' ' + postfix1) : message.content
             }))
             .splice(messages.length - MESSAGE_LIMIT)
     ];
-    console.log('----input----');
+    console.log('------input------');
     returnMsgs.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
     return returnMsgs;
 };
 
 export const setUpBot = () => {
     const bot = new TelegramBot(telegramToken, { polling: true });
-    const chatHistories: Map<number, Array<ChatMessage>> = new Map()
+    const chatHistories: Map<number, Array<ChatMessage>> = new Map();
 
-    // handle on call chatbot
-    bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => {
+    const handleIncomingMessage = async (msg: Message, devMode: boolean) => {
         const chatId = msg.chat.id;
         const chatHistory = chatHistories.get(chatId) || []
         const chatContent = msg.text.substring(2).trim();
+        const isPrivate = msg.chat.type === MessageType.PRIVATE;
+        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}`);
         bot.sendChatAction(chatId, 'typing');
         chatHistory.push({
             name: msg.from.username,
             content: chatContent,
             role: RoleEnum.USER
         });
-        const replyContent = await handleMessage(getMessages(chatHistory));
-        console.log('----output----');
-        console.log(`${botName}: ${replyContent}\n\n`);
+        const replyContent = await handleMessage(getMessages(chatHistory, devMode));
+        console.log('------output------');
+        console.log(`${botName}: ${replyContent}`);
         bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
         chatHistory.push({
             name: botName,
@@ -56,14 +63,14 @@ export const setUpBot = () => {
             role: RoleEnum.ASSISTANT
         });
         chatHistories.set(chatId, chatHistory);
-    });
+    }
 
-    // handle reset chat context
-    bot.onText(BOT_COMMAND.CALL, (msg: any) => {
-        const chatId = msg.chat.id;
+    // handle on call chatbot
+    bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => handleIncomingMessage(msg, false));
 
-        bot.sendMessage(chatId, 'Nghe?', { reply_to_message_id: msg.message_id });
-    });
+    // handle on dev request
+    bot.onText(BOT_COMMAND.DEV, async (msg: Message) => handleIncomingMessage(msg, true));
+
 
     // handle reset chat context
     bot.onText(BOT_COMMAND.RESET, (msg: any) => {

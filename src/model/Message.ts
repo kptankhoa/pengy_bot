@@ -14,6 +14,7 @@ export interface Message {
     chat: {
         id: number; // chat id
         first_name: string;
+        title: string; //group name
         username: string;
         type: MessageType;
     },

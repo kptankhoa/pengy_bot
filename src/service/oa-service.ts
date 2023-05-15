@@ -1,5 +1,7 @@
 import {apiKey, completeRequestConfig, defaultMessage, postfix, systemMessage} from "../const/const";
 import {ChatMessage} from "../model/ChatMessage";
+import { v4 as uuidv4 } from 'uuid';
+
 
 const { Configuration, OpenAIApi } = require("openai");
 
@@ -12,6 +14,7 @@ export const handleMessage = async (messages: ChatMessage[]): Promise<string> =>
     try {
         const completion = await openai.createChatCompletion({
             messages,
+            user: uuidv4(),
             ...completeRequestConfig
         });
         return completion.data.choices[0].message.content;
