@@ -6,7 +6,7 @@ import {handleMessage} from "./oa-service";
 const TelegramBot = require("node-telegram-bot-api");
 
 const BOT_COMMAND = {
-    CHAT: new RegExp('^/q +'),
+    CHAT: new RegExp('^/c +'),
     CALL: new RegExp('^/a'),
     RESET: new RegExp('^/w'),
 }

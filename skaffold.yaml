@@ -1,0 +1,12 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+metadata:
+  name: chillaxgoodboithebot
+build:
+  artifacts:
+  - image: asia-southeast1-docker.pkg.dev/greennn/greennn/chillax-goodboi
+    docker:
+      dockerfile: Dockerfile
+manifests:
+  rawYaml:
+  - deployment.yaml
