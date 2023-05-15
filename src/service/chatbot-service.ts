@@ -1,4 +1,4 @@
-import {botName, telegramToken} from "../const/const";
+import {botName, postfix, systemMessage, telegramToken} from "../const/const";
 import {Message} from "../model/Message";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
 import {handleMessage} from "./oa-service";
@@ -9,6 +9,26 @@ const BOT_COMMAND = {
     CHAT: new RegExp('^/q +'),
     RESET: new RegExp('^/w'),
 }
+
+const MESSAGE_LIMIT = 20;
+
+const getMessages = (messages: ChatMessage[]) => {
+    const returnMsgs = [
+        {
+            role: RoleEnum.SYSTEM,
+            content: systemMessage
+        },
+        ...messages
+            .map((message, index) => ({
+                ...message,
+                content: index === messages.length - 1 ? message.content.concat(postfix) : message.content
+            }))
+            .splice(messages.length - MESSAGE_LIMIT)
+    ];
+    console.log('----input----');
+    returnMsgs.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
+    return returnMsgs;
+};
 
 export const setUpBot = () => {
     const bot = new TelegramBot(telegramToken, { polling: true });
@@ -24,7 +44,9 @@ export const setUpBot = () => {
             content: chatContent,
             role: RoleEnum.USER
         });
-        const replyContent = await handleMessage(chatHistory);
+        const replyContent = await handleMessage(getMessages(chatHistory));
+        console.log('----output----');
+        console.log(`${botName}: ${replyContent}`);
         chatHistory.push({
             name: botName,
             content: replyContent,

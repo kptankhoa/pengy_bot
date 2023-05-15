@@ -1,5 +1,5 @@
 import {apiKey, completeRequestConfig, defaultMessage, postfix, systemMessage} from "../const/const";
-import {ChatMessage, RoleEnum} from "../model/ChatMessage";
+import {ChatMessage} from "../model/ChatMessage";
 
 const { Configuration, OpenAIApi } = require("openai");
 
@@ -8,23 +8,10 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const getMessages = (messages: ChatMessage[]) => {
-    return [
-        {
-            role: RoleEnum.SYSTEM,
-            content: systemMessage
-        },
-        ...messages.map((message, index) => ({
-            ...message,
-            content: index === messages.length - 1 ? message.content.concat(postfix) : message.content
-        }))
-    ]
-}
-
-export const handleMessage = async (messages: ChatMessage[]) => {
+export const handleMessage = async (messages: ChatMessage[]): Promise<string> => {
     try {
         const completion = await openai.createChatCompletion({
-            messages: getMessages(messages),
+            messages,
             ...completeRequestConfig
         });
         return completion.data.choices[0].message.content;
