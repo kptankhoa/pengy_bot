@@ -14,6 +14,6 @@ export const completeRequestConfig = {
     top_p: Number(process.env.OPENAI_TOP_P || 0),
     n: 1,
     stream: false,
-    presence_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY || 0),
+    presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY || 0),
     frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY || 0)
 }

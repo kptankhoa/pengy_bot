@@ -5,13 +5,14 @@ export enum MessageType {
 export interface Message {
     message_id: number;
     from: {
-        id: string; // chat id
+        id: number; // user id
         is_bot: boolean;
         first_name: string;
         language_code: string;
+        username: string;
     };
     chat: {
-        id: string; // chat id
+        id: number; // chat id
         first_name: string;
         username: string;
         type: MessageType;
