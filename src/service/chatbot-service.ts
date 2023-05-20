@@ -1,31 +1,32 @@
-import {botName, postfix, postfixDev, systemMessage, systemMessageDev, telegramToken} from "../const/const";
+import {botName, telegramToken} from "../const/config.const";
 import {Message, MessageType} from "../model/Message";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
 import {handleMessage} from "./oa-service";
+import {characteristicMap, ChatModeEnum, chatModes} from "../const/characteristics";
 
 const TelegramBot = require("node-telegram-bot-api");
 
 const BOT_COMMAND = {
-    CHAT: new RegExp('^/c +'),
-    DEV: new RegExp('^/d'),
-    STAY: new RegExp('^/s'),
-    RESET: new RegExp('^/w'),
+    RESET: new RegExp('^/z'),
 }
 
 const MESSAGE_LIMIT = 20;
 
-const getMessages = (messages: ChatMessage[], dev: boolean = false) => {
-    const systemMsg = dev ? systemMessageDev : systemMessage;
-    const postfix1 = dev ? postfixDev : postfix;
+const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${chatId}`;
+
+const getMessages = (messages: ChatMessage[], mode: ChatModeEnum) => {
+    const { systemGuide, postfix } = characteristicMap[mode];
     const returnMsgs = [
         {
             role: RoleEnum.SYSTEM,
-            content: systemMsg
+            content: systemGuide
         },
         ...messages
             .map((message, index) => ({
                 ...message,
-                content: (index === messages.length - 1) ? message.content.concat(' ' + postfix1) : message.content
+                content: (index === messages.length - 1)
+                    ? message.content.concat('\n' + postfix).trim()
+                    : message.content
             }))
             .splice(messages.length - MESSAGE_LIMIT)
     ];
@@ -36,21 +37,22 @@ const getMessages = (messages: ChatMessage[], dev: boolean = false) => {
 
 export const setUpBot = () => {
     const bot = new TelegramBot(telegramToken, { polling: true });
-    const chatHistories: Map<number, Array<ChatMessage>> = new Map();
+    const chatHistories: Map<string, Array<ChatMessage>> = new Map();
 
-    const handleIncomingMessage = async (msg: Message, devMode: boolean) => {
+    const handleIncomingMessage = async (msg: Message, mode: ChatModeEnum) => {
         const chatId = msg.chat.id;
-        const chatHistory = chatHistories.get(chatId) || []
+        const historyId = getChatHistoryKey(mode, chatId);
+        const chatHistory = chatHistories.get(historyId) || []
         const chatContent = msg.text.substring(2).trim();
         const isPrivate = msg.chat.type === MessageType.PRIVATE;
-        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}`);
+        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}`);
         bot.sendChatAction(chatId, 'typing');
         chatHistory.push({
             name: msg.from.username,
             content: chatContent,
             role: RoleEnum.USER
         });
-        const replyContent = await handleMessage(getMessages(chatHistory, devMode));
+        const replyContent = await handleMessage(getMessages(chatHistory, mode));
         console.log('------output------');
         console.log(`${botName}: ${replyContent}`);
         bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
@@ -59,43 +61,39 @@ export const setUpBot = () => {
             content: replyContent,
             role: RoleEnum.ASSISTANT
         });
-        chatHistories.set(chatId, chatHistory);
+        chatHistories.set(historyId, chatHistory);
     }
 
-    // handle on call chatbot
-    bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => handleIncomingMessage(msg, false));
-    bot.onText(BOT_COMMAND.STAY, async (msg: Message) => {
-        const chatId = msg.chat.id;
-        const chatHistory = chatHistories.get(chatId) || []
-        console.log(`\n\n--------from: chillax remind`);
-        bot.sendChatAction(chatId, 'typing');
-        chatHistory.push({
-            name: msg.from.username,
-            content: 'Stay in Chillax mode',
-            role: RoleEnum.USER
-        });
-        const replyContent = await handleMessage(getMessages(chatHistory, false));
-        console.log('------output------');
-        console.log(`${botName}: ${replyContent}`);
-        bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
-        chatHistory.push({
-            name: botName,
-            content: replyContent,
-            role: RoleEnum.ASSISTANT
-        });
-        chatHistories.set(chatId, chatHistory);
-    });
+    // // handle on call chatbot
+    // bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => handleIncomingMessage(msg, false));
+    //
+    // // handle on dev request
+    // bot.onText(BOT_COMMAND.DEV, async (msg: Message) => handleIncomingMessage(msg, true));
 
-    // handle on dev request
-    bot.onText(BOT_COMMAND.DEV, async (msg: Message) => handleIncomingMessage(msg, true));
-
-
+    chatModes.forEach((chatMode) => {
+        bot.onText(chatMode.command, async (msg: Message) => handleIncomingMessage(msg, chatMode.mode));
+    })
     // handle reset chat context
-    bot.onText(BOT_COMMAND.RESET, (msg: any) => {
+    bot.onText(BOT_COMMAND.RESET, (msg: Message) => {
+        const chatModeMap = {
+            c: ChatModeEnum.chillax,
+            d: ChatModeEnum.dev,
+            s: ChatModeEnum.story,
+            n: ChatModeEnum.news,
+            w: ChatModeEnum.compose,
+            x: ChatModeEnum.dieubinh,
+        };
         const chatId = msg.chat.id;
+        // @ts-ignore
+        const toBeResetMode = chatModeMap[msg.text[3]];
+        if (!toBeResetMode) {
+            bot.sendMessage(chatId, 'Chọn sai rồi, chọn lại đi', { reply_to_message_id: msg.message_id });
+            return;
+        }
+        const historyId = getChatHistoryKey(toBeResetMode, chatId);
 
-        chatHistories.set(chatId, []);
-
+        chatHistories.set(historyId, []);
+        console.log(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${toBeResetMode}`);
         bot.sendMessage(chatId, 'Cleared', { reply_to_message_id: msg.message_id });
     });
 

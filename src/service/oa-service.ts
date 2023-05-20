@@ -1,4 +1,4 @@
-import {apiKey, completeRequestConfig, defaultMessage, postfix, systemMessage} from "../const/const";
+import {apiKey, completeRequestConfig, defaultMessage} from "../const/config.const";
 import {ChatMessage} from "../model/ChatMessage";
 import { v4 as uuidv4 } from 'uuid';
 
