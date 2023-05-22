@@ -15,7 +15,7 @@ const MESSAGE_LIMIT = 20;
 const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${chatId}`;
 
 const getMessages = (messages: ChatMessage[], mode: ChatModeEnum) => {
-    const { systemGuide, postfix } = characteristicMap[mode];
+    const { systemGuide, postfix, limit } = characteristicMap[mode];
     const returnMsgs = [
         {
             role: RoleEnum.SYSTEM,
@@ -28,7 +28,7 @@ const getMessages = (messages: ChatMessage[], mode: ChatModeEnum) => {
                     ? message.content.concat('\n' + postfix).trim()
                     : message.content
             }))
-            .splice(messages.length - MESSAGE_LIMIT)
+            .splice(messages.length - (limit ?? MESSAGE_LIMIT))
     ];
     console.log('------input------');
     returnMsgs.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));

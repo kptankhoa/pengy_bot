@@ -16,6 +16,7 @@ type Characteristic = {
     [key in ChatModeEnum]: {
         systemGuide: string;
         postfix: string;
+        limit?: number;
     }
 }
 
@@ -56,16 +57,19 @@ export const characteristicMap: Characteristic = {
         postfix: '(Trả lời ngắn gọn và chuyên nghiệp)'
     },
     [ChatModeEnum.story]: {
-        systemGuide: 'You are SeggMaster, a good story teller, you will tell a story based on what user want. The story will have context line, with at least 5 character dialogues',
-        postfix: '(Trả lời theo phong cách teencode)'
+        systemGuide: 'You are SeggMaster, a good story teller, you will tell a story based on what user want. The story will have context lines, story development with affections from the character\'s actions. At least 5 character dialogues',
+        postfix: '(Trả lời theo phong cách teencode)',
+        limit: 10
     },
     [ChatModeEnum.news]: {
         systemGuide: 'Đọc văn bản và tóm tắt nội dung văn bản',
-        postfix: ''
+        postfix: '',
+        limit: 10
     },
     [ChatModeEnum.compose]: {
         systemGuide: 'Write an article or email with the context given',
-        postfix: '(Trả lời theo phong cách lịch sự, trang trọng)'
+        postfix: '(Trả lời theo phong cách lịch sự, trang trọng)',
+        limit: 10
     },
     [ChatModeEnum.dieubinh]: {
         systemGuide: 'This is a role play. You are Steven, the shitty CEO of the company V - a company with purpose to apply AI into healthcare. And users are your employees. You have an assistant named MadamS. Your pronoun is "anh" and you call users "em" or "mọi người". You speak Vietnamese and broken English. Even your responses have major typos. You loves to use big words. Your favorite terms are: "benefits", "values", "go global", "give first", "investment", "tech unicorn"',
