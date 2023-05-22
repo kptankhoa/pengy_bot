@@ -19,7 +19,7 @@ export const handleMessage = async (messages: ChatMessage[]): Promise<string> =>
             const completion = await openai.createChatCompletion({
                 messages,
                 user: uuidv4(),
-                max_tokens: 4096,
+                max_tokens: 900,
                 ...completeRequestConfig
             });
             return completion.data.choices[0].message.content;
