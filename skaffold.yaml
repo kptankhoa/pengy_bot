@@ -7,8 +7,6 @@ build:
   - image: asia-southeast1-docker.pkg.dev/greennn/greennn/chillax-goodboi
     docker:
       dockerfile: Dockerfile
-deploy:
-  kubeContext: greennn
 manifests:
   rawYaml:
   - deployment.yaml

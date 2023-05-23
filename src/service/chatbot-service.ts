@@ -1,4 +1,4 @@
-import {botName, telegramToken} from "../const/config.const";
+import {defaultBotName, telegramToken} from "../const/config.const";
 import {Message, MessageType} from "../model/Message";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
 import {handleMessage} from "./oa-service";
@@ -43,9 +43,10 @@ export const setUpBot = () => {
         const chatId = msg.chat.id;
         const historyId = getChatHistoryKey(mode, chatId);
         const chatHistory = chatHistories.get(historyId) || []
-        const chatContent = msg.text.substring(2).trim();
+        const chatContent = msg.text.startsWith('/') ? msg.text.substring(2).trim() : msg.text;
         const isPrivate = msg.chat.type === MessageType.PRIVATE;
-        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}`);
+        const botName = characteristicMap[mode]?.name || defaultBotName;
+        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date()}`);
         bot.sendChatAction(chatId, 'typing');
         chatHistory.push({
             name: msg.from.username,
@@ -62,19 +63,9 @@ export const setUpBot = () => {
             role: RoleEnum.ASSISTANT
         });
         chatHistories.set(historyId, chatHistory);
-    }
+    };
 
-    // // handle on call chatbot
-    // bot.onText(BOT_COMMAND.CHAT, async (msg: Message) => handleIncomingMessage(msg, false));
-    //
-    // // handle on dev request
-    // bot.onText(BOT_COMMAND.DEV, async (msg: Message) => handleIncomingMessage(msg, true));
-
-    chatModes.forEach((chatMode) => {
-        bot.onText(chatMode.command, async (msg: Message) => handleIncomingMessage(msg, chatMode.mode));
-    })
-    // handle reset chat context
-    bot.onText(BOT_COMMAND.RESET, (msg: Message) => {
+    const handleResetMessage = (msg: Message) => {
         const chatModeMap = {
             c: ChatModeEnum.chillax,
             d: ChatModeEnum.dev,
@@ -94,8 +85,25 @@ export const setUpBot = () => {
 
         chatHistories.set(historyId, []);
         console.log(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${toBeResetMode}`);
-        bot.sendMessage(chatId, 'Cleared', { reply_to_message_id: msg.message_id });
+        bot.sendMessage(chatId, `Cleared chat history in ${toBeResetMode} mode`, { reply_to_message_id: msg.message_id });
+    }
+
+    bot.on('message', (msg: Message) => {
+        const chatText = msg.text;
+
+        if (chatText.match(BOT_COMMAND.RESET)) {
+            handleResetMessage(msg);
+            return;
+        }
+
+        const chatMode = chatModes.find((mode) => chatText.match(mode.command));
+        if (chatMode) {
+            handleIncomingMessage(msg, chatMode.mode);
+            return;
+        }
+        handleIncomingMessage(msg, ChatModeEnum.chillax);
+
     });
 
-    console.log('---bot is running---')
+    console.log('---bot is running---');
 };

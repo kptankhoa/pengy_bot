@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-export const botName = process.env.BOT_NAME || '';
+export const defaultBotName = process.env.BOT_NAME || '';
 export const telegramToken = process.env.BOT_TOKEN || '';
 export const apiKey = process.env.OPENAI_API_KEY || '';
 export const defaultMessage = process.env.OPENAI_DEFAULT_RESPONSE || '';
