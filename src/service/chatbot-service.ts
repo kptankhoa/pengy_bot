@@ -72,7 +72,7 @@ export const setUpBot = () => {
             s: ChatModeEnum.story,
             n: ChatModeEnum.news,
             w: ChatModeEnum.compose,
-            x: ChatModeEnum.dieubinh,
+            x: ChatModeEnum.steven,
         };
         const chatId = msg.chat.id;
         // @ts-ignore
