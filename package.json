@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^20.1.4",
     "@types/uuid": "^9.0.1",
+    "gpt-tokens": "^1.0.7",
     "nodemon": "^2.0.22",
     "rimraf": "^5.0.0",
     "ts-node": "^10.9.1",

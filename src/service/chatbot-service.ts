@@ -1,7 +1,7 @@
 import {defaultBotName, telegramToken} from "../const/config.const";
 import {Message, MessageType} from "../model/Message";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
-import {handleMessage} from "./oa-service";
+import {handleMessages} from "./oa-service";
 import {characteristicMap, ChatModeEnum, chatModes} from "../const/characteristics";
 
 const TelegramBot = require("node-telegram-bot-api");
@@ -10,34 +10,12 @@ const BOT_COMMAND = {
     RESET: new RegExp('^/z'),
 }
 
-const MESSAGE_LIMIT = 20;
-
 const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${chatId}`;
-
-const getMessages = (messages: ChatMessage[], mode: ChatModeEnum) => {
-    const { systemGuide, postfix, limit } = characteristicMap[mode];
-    const returnMsgs = [
-        {
-            role: RoleEnum.SYSTEM,
-            content: systemGuide
-        },
-        ...messages
-            .map((message, index) => ({
-                ...message,
-                content: (index === messages.length - 1)
-                    ? message.content.concat('\n' + postfix).trim()
-                    : message.content
-            }))
-            .splice(messages.length - (limit ?? MESSAGE_LIMIT))
-    ];
-    console.log('------input------');
-    returnMsgs.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
-    return returnMsgs;
-};
 
 export const setUpBot = () => {
     const bot = new TelegramBot(telegramToken, { polling: true });
     const chatHistories: Map<string, Array<ChatMessage>> = new Map();
+    const lastInteraction: Map<number, ChatModeEnum> = new Map();
 
     const handleIncomingMessage = async (msg: Message, mode: ChatModeEnum) => {
         const chatId = msg.chat.id;
@@ -53,7 +31,7 @@ export const setUpBot = () => {
             content: chatContent,
             role: RoleEnum.USER
         });
-        const replyContent = await handleMessage(getMessages(chatHistory, mode));
+        const replyContent = await handleMessages(chatHistory, mode);
         console.log('------output------');
         console.log(`${botName}: ${replyContent}`);
         bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
@@ -62,6 +40,7 @@ export const setUpBot = () => {
             content: replyContent,
             role: RoleEnum.ASSISTANT
         });
+        lastInteraction.set(chatId, mode);
         chatHistories.set(historyId, chatHistory);
     };
 
@@ -74,6 +53,7 @@ export const setUpBot = () => {
             w: ChatModeEnum.compose,
             t: ChatModeEnum.translator,
             g: ChatModeEnum.google,
+            k: ChatModeEnum.karen,
             x: ChatModeEnum.steven,
         };
         const chatId = msg.chat.id;
@@ -92,6 +72,7 @@ export const setUpBot = () => {
 
     bot.on('message', (msg: Message) => {
         const chatText = msg.text;
+        const chatId = msg.chat.id;
 
         if (chatText.match(BOT_COMMAND.RESET)) {
             handleResetMessage(msg);
@@ -103,8 +84,9 @@ export const setUpBot = () => {
             handleIncomingMessage(msg, chatMode.mode);
             return;
         }
-        handleIncomingMessage(msg, ChatModeEnum.chillax);
 
+        const lastInteractionMode = lastInteraction.get(chatId);
+        lastInteractionMode ? handleIncomingMessage(msg, lastInteractionMode) : handleIncomingMessage(msg, ChatModeEnum.chillax);
     });
 
     console.log('---bot is running---');
