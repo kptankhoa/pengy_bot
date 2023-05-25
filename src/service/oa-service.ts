@@ -22,9 +22,10 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
             const completion = await openai.createChatCompletion(request);
             return completion.data.choices[0].message.content;
         } catch (error: any) {
+            console.log('=====error, retries time: ' + retries);
             if (error.response) {
-                console.log('error status: ' + error.response.status);
-                console.log('error data: ' + error.response.data);
+                console.log('status: ' + error.response.status);
+                console.log(error.response.data);
             } else {
                 console.log('error message: ' + error.message);
             }
