@@ -72,6 +72,8 @@ export const setUpBot = () => {
             s: ChatModeEnum.story,
             n: ChatModeEnum.news,
             w: ChatModeEnum.compose,
+            t: ChatModeEnum.translator,
+            g: ChatModeEnum.google,
             x: ChatModeEnum.steven,
         };
         const chatId = msg.chat.id;
