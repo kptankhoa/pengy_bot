@@ -15,7 +15,8 @@ const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${cha
 export const setUpBot = () => {
     const bot = new TelegramBot(telegramToken, { polling: true });
     const chatHistories: Map<string, Array<ChatMessage>> = new Map();
-    const lastInteraction: Map<number, ChatModeEnum> = new Map();
+    const botMessageIdMap: Map<number, ChatModeEnum> = new Map();
+    const lastInteractionModeMap: Map<number, ChatModeEnum> = new Map();
 
     const handleIncomingMessage = async (msg: Message, mode: ChatModeEnum) => {
         const chatId = msg.chat.id;
@@ -34,13 +35,14 @@ export const setUpBot = () => {
         const replyContent = await handleMessages(chatHistory, mode);
         console.log('------output------');
         console.log(`${botName}: ${replyContent}`);
-        bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
+        const res: Message = await bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
         chatHistory.push({
             name: botName,
             content: replyContent,
             role: RoleEnum.ASSISTANT
         });
-        lastInteraction.set(chatId, mode);
+        botMessageIdMap.set(res.message_id, mode);
+        lastInteractionModeMap.set(chatId, mode);
         chatHistories.set(historyId, chatHistory);
     };
 
@@ -72,20 +74,23 @@ export const setUpBot = () => {
 
     bot.on('message', (msg: Message) => {
         const chatText = msg.text;
+        const replyMessageId = msg.reply_to_message?.message_id;
         const chatId = msg.chat.id;
 
         if (chatText.match(BOT_COMMAND.RESET)) {
-            handleResetMessage(msg);
-            return;
+            return handleResetMessage(msg);
         }
 
         const chatMode = chatModes.find((mode) => chatText.match(mode.command));
         if (chatMode) {
-            handleIncomingMessage(msg, chatMode.mode);
-            return;
+            return handleIncomingMessage(msg, chatMode.mode);
         }
 
-        const lastInteractionMode = lastInteraction.get(chatId);
+        const replyToBotMode = replyMessageId ? botMessageIdMap.get(replyMessageId) : null;
+        if (replyToBotMode) {
+            return handleIncomingMessage(msg, replyToBotMode);
+        }
+        const lastInteractionMode = lastInteractionModeMap.get(chatId);
         lastInteractionMode ? handleIncomingMessage(msg, lastInteractionMode) : handleIncomingMessage(msg, ChatModeEnum.chillax);
     });
 

@@ -18,6 +18,9 @@ export interface Message {
         username: string;
         type: MessageType;
     },
+    reply_to_message?: {
+        message_id: number;
+    },
     date: number;
     text: string;
     entities?: any[];
