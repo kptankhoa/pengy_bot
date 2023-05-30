@@ -1,13 +1,14 @@
 import {defaultBotName, telegramToken} from "../const/config.const";
 import {Message, MessageType} from "../model/Message";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
-import {handleMessages} from "./oa-service";
+import {handleImageRequest, handleMessageRequest} from "./oa-service";
 import {characteristicMap, ChatModeEnum, chatModes} from "../const/characteristics";
 
 const TelegramBot = require("node-telegram-bot-api");
 
 const BOT_COMMAND = {
     RESET: new RegExp('^/z'),
+    IMAGE: new RegExp('^/i +'),
 }
 
 const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${chatId}`;
@@ -32,7 +33,7 @@ export const setUpBot = () => {
             content: chatContent,
             role: RoleEnum.USER
         });
-        const replyContent = await handleMessages(chatHistory, mode);
+        const replyContent = await handleMessageRequest(chatHistory, mode);
         console.log('------output------');
         console.log(`${botName}: ${replyContent}`);
         const res: Message = await bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
@@ -70,6 +71,20 @@ export const setUpBot = () => {
         chatHistories.set(historyId, []);
         console.log(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${toBeResetMode}`);
         bot.sendMessage(chatId, `Cleared chat history in ${toBeResetMode} mode`, { reply_to_message_id: msg.message_id });
+    };
+
+    const handleImageMessage = async (msg: Message) => {
+        const chatId = msg.chat.id;
+        const prompt = msg.text.substring(2).trim();
+        const isPrivate = msg.chat.type === MessageType.PRIVATE;
+        bot.sendMessage(chatId, `Đang vẽ chờ xíu`, { reply_to_message_id: msg.message_id });
+        bot.sendChatAction(chatId, 'typing');
+        console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date()}`);
+        console.log(`prompt: ${prompt}`)
+        const imageUrl = await handleImageRequest(prompt);
+        imageUrl
+            ? bot.sendPhoto(chatId, imageUrl, { reply_to_message_id: msg.message_id })
+            : bot.sendMessage(chatId, `Hư quá. vẽ cái khác đi :v`, { reply_to_message_id: msg.message_id });
     }
 
     bot.on('message', (msg: Message) => {
@@ -79,6 +94,10 @@ export const setUpBot = () => {
 
         if (chatText.match(BOT_COMMAND.RESET)) {
             return handleResetMessage(msg);
+        }
+
+        if (chatText.match(BOT_COMMAND.IMAGE)) {
+            return handleImageMessage(msg);
         }
 
         const chatMode = chatModes.find((mode) => chatText.match(mode.command));
