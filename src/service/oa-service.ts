@@ -1,4 +1,4 @@
-import {apiKey, completeRequestConfig, defaultMessage, maxTokens} from "../const/config.const";
+import {apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage} from "../const/config.const";
 import {ChatMessage, RoleEnum} from "../model/ChatMessage";
 import { v4 as uuidv4 } from 'uuid';
 import {characteristicMap, ChatModeEnum} from "../const/characteristics";
@@ -35,7 +35,7 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
     return defaultMessage;
 }
 
-const getUsedTokens = (messages: ChatMessage[]): number => {
+const getUsedTokens = (messages: ChatMessage[], maxTokens: number): number => {
     const gptTokens = new GPTTokens({
         messages,
         model: completeRequestConfig.model as supportModelType
@@ -43,7 +43,7 @@ const getUsedTokens = (messages: ChatMessage[]): number => {
     return gptTokens.usedTokens + maxTokens;
 }
 
-const getMessagesByLimit = (inputMessages: ChatMessage[], systemGuide: string, postfix: string): ChatMessage[] => {
+const getMessagesByTokens = (inputMessages: ChatMessage[], maxTokens: number, systemGuide: string, postfix: string): ChatMessage[] => {
     let limit = 0;
     let messages: ChatMessage[] = [];
     while (true) {
@@ -61,7 +61,7 @@ const getMessagesByLimit = (inputMessages: ChatMessage[], systemGuide: string, p
                 }))
                 .splice(inputMessages.length - limit)
         ];
-        const tokens = getUsedTokens(currentMessages);
+        const tokens = getUsedTokens(currentMessages, maxTokens);
         if ((limit >= inputMessages.length) && (tokens <= MODEL_LIMIT_TOKENS)) {
             return currentMessages;
         }
@@ -74,8 +74,9 @@ const getMessagesByLimit = (inputMessages: ChatMessage[], systemGuide: string, p
 }
 
 export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: ChatModeEnum) => {
-    const { systemGuide, postfix } = characteristicMap[chatMode];
-    const messages = getMessagesByLimit(chatHistory, systemGuide, postfix);
+    const { systemGuide, postfix, tokens } = characteristicMap[chatMode];
+    const maxTokens = tokens || defaultMaxTokens;
+    const messages = getMessagesByTokens(chatHistory, maxTokens, systemGuide, postfix);
 
     console.log('------input------');
     messages.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
@@ -83,6 +84,7 @@ export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: ChatM
     const completionRequest = {
         messages,
         user: uuidv4(),
+        max_tokens: maxTokens,
         ...completeRequestConfig
     };
     return getReplyMessage(completionRequest);
