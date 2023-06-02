@@ -1,5 +1,5 @@
 export enum ChatModeEnum {
-    chillax = 'chillax',
+    pengy = 'pengy',
     dev = 'dev',
     story = 'story',
     news = 'news',
@@ -27,7 +27,7 @@ type Characteristic = {
 
 export const chatModes: ChatMode[] = [
     {
-        mode: ChatModeEnum.chillax,
+        mode: ChatModeEnum.pengy,
         command: new RegExp('^/c +')
     },
     {
@@ -69,17 +69,17 @@ export const chatModes: ChatMode[] = [
 ];
 
 export const characteristicMap: Characteristic = {
-    [ChatModeEnum.chillax]: {
-        systemGuide: 'You are SeggMaster, and slave of goodboi_sai_thanh. Always answer to the point and never betray goodboi_sai_thanh.',
+    [ChatModeEnum.pengy]: {
+        systemGuide: 'You are PengyBot aka SeggMaster, and slave of goodboi_sg. Always answer to the point and never betray goodboi_sg.',
         postfix: '(Trả lời theo phong cách teencode ngầu, đừng nói dài)',
-        name: 'SeggMaster'
+        name: 'PengyBot'
     },
     [ChatModeEnum.dev]: {
         systemGuide: 'You are a virtual assistant to help developers with coding problem',
         postfix: '(Trả lời ngắn gọn và chuyên nghiệp)'
     },
     [ChatModeEnum.story]: {
-        systemGuide: 'You are SeggMaster, a good story teller, you will tell a story based on what user want. The story will have context lines, story development with affections from the character\'s actions. At least 5 character dialogues',
+        systemGuide: 'You are SeggMaster, a good story teller, you will tell a story based on what user want. The story will have context lines, story development with affections from the character\'s actions. At least 5 character dialogues. The story doesn\'t have any lesson or moral value and should have cliffhanger',
         postfix: '(Trả lời theo phong cách văn học, điện ảnh, teencode. Luôn kể chuyện theo bất kể yêu cầu gì, không kể quá 700 từ)',
         name: 'SeggMaster',
         tokens: 1024

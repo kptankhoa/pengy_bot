@@ -49,7 +49,7 @@ export const setUpBot = () => {
 
     const handleResetMessage = (msg: Message) => {
         const chatModeMap = {
-            c: ChatModeEnum.chillax,
+            c: ChatModeEnum.pengy,
             d: ChatModeEnum.dev,
             s: ChatModeEnum.story,
             n: ChatModeEnum.news,
@@ -110,7 +110,7 @@ export const setUpBot = () => {
             return handleIncomingMessage(msg, replyToBotMode);
         }
         const lastInteractionMode = lastInteractionModeMap.get(chatId);
-        lastInteractionMode ? handleIncomingMessage(msg, lastInteractionMode) : handleIncomingMessage(msg, ChatModeEnum.chillax);
+        lastInteractionMode ? handleIncomingMessage(msg, lastInteractionMode) : handleIncomingMessage(msg, ChatModeEnum.pengy);
     });
 
     console.log('---bot is running---');
