@@ -1,8 +1,8 @@
 const weather = require('weather-js');
 
-export const getWeatherRequest = (search: string, callback: (result: any) => void) => {
+export const getWeatherRequest = (search: string, callback: (weatherObj: any) => void) => {
     weather.find({ search, degreeType: 'C' }, (err: any, result: any) => {
-        if (err) {
+        if (err || !result.length) {
             console.log('------weather error-----\n')
             console.log(err);
             callback(null);
