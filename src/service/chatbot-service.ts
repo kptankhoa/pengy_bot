@@ -3,12 +3,14 @@ import { Message, MessageType } from "../model/message";
 import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleImageRequest, handleMessageRequest } from "./oa-service";
 import { characteristicMap, ChatModeEnum, chatModes } from "../const/characteristics";
+import { handleWeatherRequest } from "./weather-service";
 
 const TelegramBot = require("node-telegram-bot-api");
 
 const BOT_COMMAND = {
     RESET: new RegExp('^/z'),
     IMAGE: new RegExp('^/i +'),
+    WEATHER: new RegExp('^/b +'),
 }
 
 const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${chatId}`;
@@ -88,6 +90,29 @@ export const setUpBot = () => {
             : bot.sendMessage(chatId, `Hư quá. vẽ cái khác đi :v`, { reply_to_message_id: msg.message_id });
     }
 
+    const handleWeatherMessage = async (msg: Message) => {
+        const chatId = msg.chat.id;
+        const search = msg.text.substring(2).trim();
+        const weatherPrompt = 'Given the following JSON, give me a Vietnamese report and forecast of the weather now and following days using emoji. Report and forecast specifically. Note that forecast[0] is the forecast of later today';
+        bot.sendChatAction(chatId, 'typing');
+        const sendWeatherMsgCallback = async (weatherObject: any) => {
+            if (!weatherObject) {
+                bot.sendMessage(chatId, 'bùn quá, không tìm thấy location rui. ở địa ngục ha j?', { reply_to_message_id: msg.message_id });
+                return;
+            }
+            const history: ChatMessage[] = [{
+                name: msg.from.username,
+                role: RoleEnum.USER,
+                content: `${weatherPrompt}${JSON.stringify(weatherObject, null, 2)}`
+            }];
+            const replyContent = await handleMessageRequest(history, ChatModeEnum.content);
+            console.log('------output------');
+            console.log(`weather: ${replyContent}`);
+            bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
+        }
+        handleWeatherRequest(search, sendWeatherMsgCallback);
+    }
+
     bot.on('message', (msg: Message) => {
         const chatText = msg.text;
         const replyMessageId = msg.reply_to_message?.message_id;
@@ -99,6 +124,10 @@ export const setUpBot = () => {
 
         if (chatText.match(BOT_COMMAND.IMAGE)) {
             return handleImageMessage(msg);
+        }
+
+        if (chatText.match(BOT_COMMAND.WEATHER)) {
+            return handleWeatherMessage(msg);
         }
 
         const chatMode = chatModes.find((mode) => chatText.match(mode.command));
