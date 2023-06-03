@@ -1,15 +1,12 @@
-import {apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage} from "../const/config.const";
-import {ChatMessage, RoleEnum} from "../model/ChatMessage";
+import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage } from "../const/config.const";
+import { ChatMessage } from "../model/chat-message";
 import { v4 as uuidv4 } from 'uuid';
-import {characteristicMap, ChatModeEnum} from "../const/characteristics";
-import {CreateChatCompletionRequest} from "openai/api";
-import {GPTTokens, supportModelType} from 'gpt-tokens'
-import {CreateImageRequest} from "openai";
-
-const { Configuration, OpenAIApi } = require("openai");
+import { characteristicMap, ChatModeEnum } from "../const/characteristics";
+import { CreateChatCompletionRequest } from "openai/api";
+import { CreateImageRequest, Configuration, OpenAIApi } from "openai";
+import { getMessagesByTokens } from "../utils/message-util";
 
 const RETRY_TIMES = 3;
-const MODEL_LIMIT_TOKENS = 4096;
 
 const configuration = new Configuration({ apiKey });
 
@@ -20,7 +17,7 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
     while (retries < RETRY_TIMES) {
         try {
             const completion = await openai.createChatCompletion(request);
-            return completion.data.choices[0].message.content;
+            return completion.data.choices[0].message?.content || defaultMessage;
         } catch (error: any) {
             console.log('=====error, retries time: ' + retries);
             if (error.response) {
@@ -33,45 +30,7 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
         }
     }
     return defaultMessage;
-}
-
-const getUsedTokens = (messages: ChatMessage[], maxTokens: number): number => {
-    const gptTokens = new GPTTokens({
-        messages,
-        model: completeRequestConfig.model as supportModelType
-    });
-    return gptTokens.usedTokens + maxTokens;
-}
-
-const getMessagesByTokens = (inputMessages: ChatMessage[], maxTokens: number, systemGuide: string, postfix: string): ChatMessage[] => {
-    let limit = 0;
-    let messages: ChatMessage[] = [];
-    while (true) {
-        const currentMessages = [
-            {
-                role: RoleEnum.SYSTEM,
-                content: systemGuide
-            },
-            ...inputMessages
-                .map((message, index) => ({
-                    ...message,
-                    content: (index === inputMessages.length - 1)
-                        ? message.content.concat('\n' + postfix).trim()
-                        : message.content
-                }))
-                .splice(inputMessages.length - limit)
-        ];
-        const tokens = getUsedTokens(currentMessages, maxTokens);
-        if ((limit >= inputMessages.length) && (tokens <= MODEL_LIMIT_TOKENS)) {
-            return currentMessages;
-        }
-        if ((limit >= inputMessages.length) || (tokens >= MODEL_LIMIT_TOKENS)) {
-            return messages;
-        }
-        messages = currentMessages;
-        limit++;
-    }
-}
+};
 
 export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: ChatModeEnum) => {
     const { systemGuide, postfix, tokens } = characteristicMap[chatMode];

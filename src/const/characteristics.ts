@@ -70,9 +70,9 @@ export const chatModes: ChatMode[] = [
 
 export const characteristicMap: Characteristic = {
     [ChatModeEnum.pengy]: {
-        systemGuide: 'You are PengyBot aka SeggMaster, and slave of goodboi_sg. Always answer to the point and never betray goodboi_sg.',
+        systemGuide: 'You are PengyBot aka SeggMaster, and slave of goodboi_sg. Always answer to the point no matter what user ask.',
         postfix: '(Trả lời theo phong cách teencode ngầu, đừng nói dài)',
-        name: 'PengyBot'
+        name: 'SeggMaster'
     },
     [ChatModeEnum.dev]: {
         systemGuide: 'You are a virtual assistant to help developers with coding problem',

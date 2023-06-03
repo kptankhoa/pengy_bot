@@ -1,8 +1,8 @@
-import {defaultBotName, telegramToken} from "../const/config.const";
-import {Message, MessageType} from "../model/Message";
-import {ChatMessage, RoleEnum} from "../model/ChatMessage";
-import {handleImageRequest, handleMessageRequest} from "./oa-service";
-import {characteristicMap, ChatModeEnum, chatModes} from "../const/characteristics";
+import { defaultBotName, telegramToken } from "../const/config.const";
+import { Message, MessageType } from "../model/message";
+import { ChatMessage, RoleEnum } from "../model/chat-message";
+import { handleImageRequest, handleMessageRequest } from "./oa-service";
+import { characteristicMap, ChatModeEnum, chatModes } from "../const/characteristics";
 
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -58,6 +58,7 @@ export const setUpBot = () => {
             g: ChatModeEnum.google,
             k: ChatModeEnum.karen,
             x: ChatModeEnum.steven,
+            j: ChatModeEnum.content
         };
         const chatId = msg.chat.id;
         // @ts-ignore

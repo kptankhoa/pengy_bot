@@ -1,5 +1,6 @@
 export enum MessageType {
-    PRIVATE = 'private'
+    PRIVATE = 'private',
+    GROUP = 'group'
 }
 
 export interface Message {
