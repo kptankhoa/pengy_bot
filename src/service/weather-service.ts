@@ -1,13 +1,17 @@
+import { SimplifiedWeather, Weather } from "../model/weather";
+import { simplifyWeatherObject } from "../utils/weather-util";
+
 const weather = require('weather-js');
 
-export const getWeatherRequest = (search: string, callback: (weatherObj: any) => void) => {
-    weather.find({ search, degreeType: 'C' }, (err: any, result: any) => {
+export const getWeatherRequest = (search: string, callback: (weatherObj: SimplifiedWeather | null) => void) => {
+    weather.find({ search, degreeType: 'C' }, (err: any, result: Weather[]) => {
         if (err || !result.length) {
             console.log('------weather error-----\n')
             console.log(err);
             callback(null);
+            return;
         }
-        callback(result[0]);
+        callback(simplifyWeatherObject(result[0]));
     });
 };
 

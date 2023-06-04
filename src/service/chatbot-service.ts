@@ -1,4 +1,4 @@
-import { defaultBotName, telegramToken } from "../const/config.const";
+import { defaultBotName, defaultMessage, telegramToken } from "../const/chatbot-config.const";
 import { Message, MessageType } from "../model/message";
 import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleImageRequest, handleMessageRequest } from "./oa-service";
@@ -24,7 +24,7 @@ export const setUpBot = () => {
     const handleIncomingMessage = async (msg: Message, mode: ChatModeEnum) => {
         const chatId = msg.chat.id;
         const historyId = getChatHistoryKey(mode, chatId);
-        const chatHistory = chatHistories.get(historyId) || []
+        const chatHistory = chatHistories.get(historyId) || [];
         const chatContent = msg.text.startsWith('/') ? msg.text.substring(2).trim() : msg.text;
         const isPrivate = msg.chat.type === MessageType.PRIVATE;
         const botName = characteristicMap[mode]?.name || defaultBotName;
@@ -91,24 +91,45 @@ export const setUpBot = () => {
     }
 
     const handleWeatherMessage = async (msg: Message) => {
+        const mode = ChatModeEnum.pengy;
         const chatId = msg.chat.id;
-        const search = msg.text.substring(2).trim();
-        const weatherPrompt = 'Given the following JSON, give me a Vietnamese report and forecast of the weather now and following days using emoji. Report and forecast specifically. Note that forecast[0] is the forecast of later today';
+        const historyId = getChatHistoryKey(mode, chatId);
+        const chatHistory = chatHistories.get(historyId) || [];
+        const isPrivate = msg.chat.type === MessageType.PRIVATE;
+        const botName = 'weather';
+        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date()}`);
+        const text = msg.text.substring(2).trim();
+        const [search, q] = text.split(',');
+        const weatherPrompt = 'Given the following JSON, give me a Vietnamese report and forecast of the weather now and following days. Note that forecast[0] is the forecast of later today. Use lots of emojis to report and forecast specifically for each day.';
+        const questionPrompt = q ? ` And answer the question: ${q}` : '';
         bot.sendChatAction(chatId, 'typing');
         const sendWeatherMsgCallback = async (weatherObject: any) => {
             if (!weatherObject) {
-                bot.sendMessage(chatId, 'bùn quá, không tìm thấy location rui. ở địa ngục ha j?', { reply_to_message_id: msg.message_id });
+                bot.sendMessage(chatId, `${defaultMessage}, ở địa ngục ha j?`, { reply_to_message_id: msg.message_id });
                 return;
             }
+            chatHistory.push({
+                name: msg.from.username,
+                content: `${weatherPrompt}${questionPrompt}`,
+                role: RoleEnum.USER
+            });
             const history: ChatMessage[] = [{
                 name: msg.from.username,
                 role: RoleEnum.USER,
-                content: `${weatherPrompt}${JSON.stringify(weatherObject, null, 2)}`
+                content: `${weatherPrompt}${questionPrompt}\n${JSON.stringify(weatherObject, null, 2)}`
             }];
-            const replyContent = await handleMessageRequest(history, ChatModeEnum.content);
+            const replyContent = await handleMessageRequest(history, mode);
             console.log('------output------');
-            console.log(`weather: ${replyContent}`);
-            bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
+            console.log(`${botName}: ${replyContent}`);
+            const res: Message = bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
+            chatHistory.push({
+                name: botName,
+                content: replyContent,
+                role: RoleEnum.ASSISTANT
+            });
+            botMessageIdMap.set(res.message_id, mode);
+            lastInteractionModeMap.set(chatId, mode);
+            chatHistories.set(historyId, chatHistory);
         }
         handleWeatherRequest(search, sendWeatherMsgCallback);
     }

@@ -1,6 +1,6 @@
 import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { GPTTokens, supportModelType } from "gpt-tokens";
-import { completeRequestConfig } from "../const/config.const";
+import { completeRequestConfig } from "../const/chatbot-config.const";
 
 const MODEL_LIMIT_TOKENS = 4096;
 
