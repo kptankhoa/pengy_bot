@@ -4,6 +4,7 @@ import { simplifyWeatherObject } from "../utils/weather-util";
 const weather = require('weather-js');
 
 export const getWeatherRequest = (search: string, callback: (weatherObj: SimplifiedWeather | null) => void) => {
+    console.log(`-----weather: search: ${search}`);
     weather.find({ search, degreeType: 'C' }, (err: any, result: Weather[]) => {
         if (err || !result.length) {
             console.log('------weather error-----\n')
