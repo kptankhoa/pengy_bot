@@ -4,7 +4,7 @@ import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleImageRequest, handleMessageRequest } from "./oa-service";
 import { characteristicMap, ChatModeEnum, chatModes } from "../const/characteristics";
 import { handleWeatherRequest } from "./weather-service";
-import { getUrlContent } from "./readability-service";
+import { getUrlContent } from "./news-service";
 import { isUrl } from "../utils/common-util";
 
 const TelegramBot = require("node-telegram-bot-api");
@@ -145,7 +145,7 @@ export const setUpBot = () => {
             return;
         }
         const articleContent = await getUrlContent(chatContent);
-        const newMsg: Message = { ...msg, text: '' + articleContent };
+        const newMsg: Message = { ...msg, text: articleContent || '' };
         handleIncomingMessage(newMsg, mode);
     }
 
