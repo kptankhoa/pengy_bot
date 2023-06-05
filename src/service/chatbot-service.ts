@@ -4,6 +4,8 @@ import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleImageRequest, handleMessageRequest } from "./oa-service";
 import { characteristicMap, ChatModeEnum, chatModes } from "../const/characteristics";
 import { handleWeatherRequest } from "./weather-service";
+import { getUrlContent } from "./readability-service";
+import { isUrl } from "../utils/common-util";
 
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -11,6 +13,7 @@ const BOT_COMMAND = {
     RESET: new RegExp('^/z'),
     IMAGE: new RegExp('^/i +'),
     WEATHER: new RegExp('^/b +'),
+    NEWS: new RegExp('^/n +'),
 }
 
 const getChatHistoryKey = (mode: ChatModeEnum, chatId: number) => `${mode}-${chatId}`;
@@ -134,6 +137,18 @@ export const setUpBot = () => {
         handleWeatherRequest(search, sendWeatherMsgCallback);
     }
 
+    const handleNewsMessage = async (msg: Message) => {
+        const chatContent = msg.text.substring(2).trim();
+        const mode = ChatModeEnum.news;
+        if (!isUrl(chatContent)) {
+            handleIncomingMessage(msg, mode);
+            return;
+        }
+        const articleContent = await getUrlContent(chatContent);
+        const newMsg: Message = { ...msg, text: '' + articleContent };
+        handleIncomingMessage(newMsg, mode);
+    }
+
     bot.on('message', (msg: Message) => {
         const chatText = msg.text;
         const replyMessageId = msg.reply_to_message?.message_id;
@@ -149,6 +164,10 @@ export const setUpBot = () => {
 
         if (chatText.match(BOT_COMMAND.WEATHER)) {
             return handleWeatherMessage(msg);
+        }
+
+        if (chatText.match(BOT_COMMAND.NEWS)) {
+            return handleNewsMessage(msg);
         }
 
         const chatMode = chatModes.find((mode) => chatText.match(mode.command));
