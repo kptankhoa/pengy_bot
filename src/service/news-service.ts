@@ -1,6 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import { RETRY_TIMES } from "../const/settings";
-import got from "got";
+import axios from "axios";
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
@@ -8,12 +8,12 @@ export const getUrlContent = async (url: string) => {
     let retries = 0;
     while (retries < RETRY_TIMES) {
         try {
-            const res = await got(url);
-            const doc = new JSDOM(res.body).window.document;
+            const res = await axios.get(url);
+            const doc = new JSDOM(res.data).window.document;
             const article = new Readability(doc).parse();
             return article?.textContent;
         } catch(e) {
-            console.log(e);
+            console.log('-----new url error ----, retries:' + retries);
             retries++;
         }
     }
