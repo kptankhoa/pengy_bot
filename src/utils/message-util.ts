@@ -17,10 +17,10 @@ export const getMessagesByTokens = (inputMessages: ChatMessage[], maxTokens: num
     let messages: ChatMessage[] = [];
     while (true) {
         const currentMessages = [
-            {
+            ...systemGuide ? [{
                 role: RoleEnum.SYSTEM,
                 content: systemGuide
-            },
+            }] : [],
             ...inputMessages
                 .map((message, index) => ({
                     ...message,
