@@ -1,4 +1,6 @@
-FROM node:16
+FROM sitespeedio/node:ubuntu-20.04-nodejs-16.13.1
+
+RUN apt-get install chromium-browser
 
 WORKDIR /usr/src/app
 
