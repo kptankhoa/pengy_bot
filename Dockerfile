@@ -1,6 +1,4 @@
-FROM sitespeedio/node:ubuntu-20.04-nodejs-16.13.1
-
-RUN apt update && apt install -y chromium-browser
+FROM node:16-alpine
 
 WORKDIR /usr/src/app
 
