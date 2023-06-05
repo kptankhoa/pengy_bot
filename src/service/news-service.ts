@@ -1,6 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import { RETRY_TIMES } from "../const/settings";
-const got = require('got');
+import got from "got";
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 

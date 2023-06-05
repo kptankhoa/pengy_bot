@@ -145,7 +145,11 @@ export const setUpBot = () => {
             return;
         }
         const articleContent = await getUrlContent(chatContent);
-        const newMsg: Message = { ...msg, text: articleContent || '' };
+        if (!articleContent) {
+            bot.sendMessage(msg.chat.id, 'không đọc báo dc r hehe', { reply_to_message_id: msg.message_id });
+            return;
+        }
+        const newMsg: Message = { ...msg, text: articleContent.trim() };
         handleIncomingMessage(newMsg, mode);
     }
 
