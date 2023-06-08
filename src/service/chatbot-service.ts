@@ -3,7 +3,7 @@ import { Message, MessageType } from "../model/message";
 import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleImageRequest, handleMessageRequest } from "./oa-service";
 import { characteristicMap, ChatModeEnum, chatModes, getChatBotRegEx, resetMap } from "../const/characteristics";
-import { handleWeatherRequest } from "./weather-service";
+import { getWeatherLocation, handleWeatherRequest } from "./weather-service";
 import { getUrlContent } from "./news-service";
 import { isUrl } from "../utils/common-util";
 
@@ -28,7 +28,7 @@ export const setUpBot = () => {
         const chatId = msg.chat.id;
         const historyId = getChatHistoryKey(mode, chatId);
         const chatHistory = chatHistories.get(historyId) || [];
-        const chatContent = msg.text.startsWith('/') ? msg.text.replace(getChatBotRegEx(mode), '').trim() : msg.text;
+        const chatContent = msg.text?.startsWith('/') ? msg.text.replace(getChatBotRegEx(mode), '').trim() : msg.text;
         const isPrivate = msg.chat.type === MessageType.PRIVATE;
         const botName = characteristicMap[mode]?.name || defaultBotName;
         console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date()}`);
@@ -80,45 +80,22 @@ export const setUpBot = () => {
     }
 
     const handleWeatherMessage = async (msg: Message) => {
-        const mode = ChatModeEnum.pengy;
         const chatId = msg.chat.id;
-        const historyId = getChatHistoryKey(mode, chatId);
-        const chatHistory = chatHistories.get(historyId) || [];
-        const isPrivate = msg.chat.type === MessageType.PRIVATE;
-        const botName = 'weather';
-        console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date()}`);
-        const [search, q] = msg.text.replace(BOT_COMMAND.WEATHER, '').trim().split(',');
-        const weatherPrompt = 'Given the following JSON, give me a Vietnamese report and forecast of the weather now and following days. Note that forecast[0] is the forecast of later today. Use lots of emojis to report and forecast specifically for each day.';
-        const questionPrompt = q ? ` And answer the question: ${q}` : '';
-        bot.sendChatAction(chatId, 'typing');
+        const chatText = msg.text.replace(BOT_COMMAND.WEATHER, '');
+        const location = await getWeatherLocation(chatText)
+        const weatherPrompt = `Given the following JSON, give me a Vietnamese report and forecast of the weather now and following days. Note that forecast[0] is the forecast of later today. Use lots of emojis to report and forecast specifically for each day. And answer following question if have any: ${chatText}`;
         const sendWeatherMsgCallback = async (weatherObject: any) => {
             if (!weatherObject) {
                 return bot.sendMessage(chatId, `${defaultMessage}, ở địa ngục ha j?`, { reply_to_message_id: msg.message_id });
             }
-            chatHistory.push({
-                name: msg.from.username,
-                content: `${weatherPrompt}${questionPrompt}`,
-                role: RoleEnum.USER
-            });
-            const history: ChatMessage[] = [{
-                name: msg.from.username,
-                role: RoleEnum.USER,
-                content: `${weatherPrompt}${questionPrompt}\n${JSON.stringify(weatherObject, null, 2)}`
-            }];
-            const replyContent = await handleMessageRequest(history, mode);
-            console.log('------output------');
-            console.log(`${botName}: ${replyContent}`);
-            const res: Message = bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
-            chatHistory.push({
-                name: botName,
-                content: replyContent,
-                role: RoleEnum.ASSISTANT
-            });
-            botMessageIdMap.set(res.message_id, mode);
-            lastInteractionModeMap.set(chatId, mode);
-            chatHistories.set(historyId, chatHistory);
+            bot.sendChatAction(chatId, 'typing');
+            const newMsg: Message = {
+                ...msg,
+                text: `${weatherPrompt}\n${JSON.stringify(weatherObject, null, 2)}`.trim()
+            }
+            handleIncomingMessage(newMsg, ChatModeEnum.pengy);
         };
-        handleWeatherRequest(search, sendWeatherMsgCallback);
+        handleWeatherRequest(location.substring(0, location.length - 1), sendWeatherMsgCallback);
     }
 
     const handleNewsMessage = async (msg: Message) => {
@@ -135,7 +112,7 @@ export const setUpBot = () => {
         handleIncomingMessage(newMsg, mode);
     }
 
-    bot.on('message', (msg: Message) => {
+    const onTextMsg = (msg: Message) => {
         const chatText = msg.text;
         const replyMessageId = msg.reply_to_message?.message_id;
         const chatId = msg.chat.id;
@@ -167,6 +144,12 @@ export const setUpBot = () => {
         }
         const lastInteractionMode = lastInteractionModeMap.get(chatId);
         lastInteractionMode ? handleIncomingMessage(msg, lastInteractionMode) : handleIncomingMessage(msg, ChatModeEnum.pengy);
+    }
+
+    bot.on('message', (msg: Message) => {
+        if (msg.text) {
+            return onTextMsg(msg);
+        }
     });
 
     console.log('---bot is running---');

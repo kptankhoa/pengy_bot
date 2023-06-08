@@ -25,7 +25,7 @@ export const getMessagesByTokens = (inputMessages: ChatMessage[], maxTokens: num
                 .map((message, index) => ({
                     ...message,
                     content: (index === inputMessages.length - 1)
-                        ? message.content.concat('\n' + postfix).trim()
+                        ? (message.content || '').concat('\n' + postfix).trim()
                         : message.content
                 }))
                 .splice(inputMessages.length - limit)
