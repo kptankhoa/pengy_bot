@@ -1,7 +1,8 @@
 import { defaultBotName, defaultMessage, telegramToken } from "../const/chatbot-config.const";
 import { Message, MessageType } from "../model/message";
 import { ChatMessage, RoleEnum } from "../model/chat-message";
-import { handleImageRequest, handleMessageRequest } from "./oa-service";
+import { handleMessageRequest } from "./oa-service";
+import { handleImageRequest } from "./imggen-service";
 import { characteristicMap, ChatModeEnum, chatModes, getChatBotRegEx, resetMap } from "../const/characteristics";
 import { getWeatherLocation, handleWeatherRequest } from "./weather-service";
 import { getUrlContent } from "./news-service";
@@ -73,10 +74,13 @@ export const setUpBot = () => {
         bot.sendChatAction(chatId, 'typing');
         console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date()}`);
         console.log(`prompt: ${prompt}`)
-        const imageUrl = await handleImageRequest(prompt);
-        imageUrl
-            ? bot.sendPhoto(chatId, imageUrl, { reply_to_message_id: msg.message_id })
-            : bot.sendMessage(chatId, `Hư quá. vẽ cái khác đi :v`, { reply_to_message_id: msg.message_id });
+        const imageUrls = await handleImageRequest(prompt);
+        if (!imageUrls || !imageUrls.length) {
+            return bot.sendMessage(chatId, `Hư quá. vẽ cái khác đi :v`, { reply_to_message_id: msg.message_id });
+        }
+        imageUrls.forEach((url) => {
+            bot.sendPhoto(chatId, url, { reply_to_message_id: msg.message_id });
+        });
     }
 
     const handleWeatherMessage = async (msg: Message) => {
