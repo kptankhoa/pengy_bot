@@ -3,6 +3,9 @@ require('dotenv').config();
 export const defaultBotName = process.env.BOT_NAME || '';
 export const telegramToken = process.env.BOT_TOKEN || '';
 export const apiKey = process.env.OPENAI_API_KEY || '';
+
+export const bingImageCookie = process.env.BING_IMAGE_COOKIE || '';
+
 export const defaultMessage = process.env.OPENAI_DEFAULT_RESPONSE || '';
 
 export const defaultMaxTokens = Number(process.env.OPENAI_DEFAULT_MAX_TOKENS || 0);
