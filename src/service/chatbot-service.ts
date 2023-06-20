@@ -1,10 +1,10 @@
 import { defaultBotName, defaultMessage, telegramToken } from "../const/chatbot-config.const";
+import { characteristicMap, ChatModeEnum, chatModes, getChatBotRegEx, resetMap } from "../const/characteristics";
 import { Message, MessageType } from "../model/message";
 import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleMessageRequest } from "./oa-service";
 import { handleImageRequest } from "./imggen-service";
-import { characteristicMap, ChatModeEnum, chatModes, getChatBotRegEx, resetMap } from "../const/characteristics";
-import { getWeatherLocation, handleWeatherRequest } from "./weather-service";
+import { getWeatherDetailPrompt, getWeatherLocation, handleWeatherRequest } from "./weather-service";
 import { getUrlContent } from "./news-service";
 import { isUrl } from "../utils/common-util";
 
@@ -55,15 +55,23 @@ export const setUpBot = () => {
 
     const handleResetMessage = (msg: Message) => {
         const chatId = msg.chat.id;
-        // @ts-ignore
-        const toBeResetMode = resetMap[msg.text[3]];
-        if (!toBeResetMode) {
-            return bot.sendMessage(chatId, 'Chọn sai rồi, chọn lại đi', { reply_to_message_id: msg.message_id });
-        }
-        const historyId = getChatHistoryKey(toBeResetMode, chatId);
-        chatHistories.set(historyId, []);
-        console.log(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${toBeResetMode}`);
-        bot.sendMessage(chatId, `Cleared chat history in ${toBeResetMode} mode`, { reply_to_message_id: msg.message_id });
+        const text = msg.text.replace(BOT_COMMAND.RESET, '').trim();
+        const modes = text.split(' ');
+        const exist: string[] = [];
+        const notExist: string[] = [];
+        modes.forEach((modeKey) => {
+            const toBeResetMode = resetMap[modeKey];
+            if (!toBeResetMode) {
+                notExist.push(modeKey);
+                return;
+            }
+            const historyId = getChatHistoryKey(toBeResetMode, chatId);
+            chatHistories.set(historyId, []);
+            exist.push(toBeResetMode);
+        });
+        const resetModes = exist.join(', ');
+        console.log(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${resetModes}`);
+        bot.sendMessage(chatId, `Cleared chat history in: ${resetModes}\nNot available: ${notExist.join(', ')}`, { reply_to_message_id: msg.message_id });
     };
 
     const handleImageMessage = async (msg: Message) => {
@@ -78,16 +86,18 @@ export const setUpBot = () => {
         if (!imageUrls || !imageUrls.length) {
             return bot.sendMessage(chatId, `Hư quá. vẽ cái khác đi :v`, { reply_to_message_id: msg.message_id });
         }
-        imageUrls.forEach((url) => {
-            bot.sendPhoto(chatId, url, { reply_to_message_id: msg.message_id });
-        });
+        const medias = imageUrls.map((url) => ({
+            type: 'photo',
+            media: url
+        }))
+        bot.sendMediaGroup(chatId, medias, { reply_to_message_id: msg.message_id });
     }
 
     const handleWeatherMessage = async (msg: Message) => {
         const chatId = msg.chat.id;
         const chatText = msg.text.replace(BOT_COMMAND.WEATHER, '');
         const location = await getWeatherLocation(chatText)
-        const weatherPrompt = `Given the following JSON, give me a Vietnamese report and forecast of the weather now and following days. Note that forecast[0] is the forecast of later today. Use lots of emojis to report and forecast specifically for each day. And answer following question if have any: ${chatText}`;
+        const weatherPrompt = getWeatherDetailPrompt(chatText);
         const sendWeatherMsgCallback = async (weatherObject: any) => {
             if (!weatherObject) {
                 return bot.sendMessage(chatId, `${defaultMessage}, ở địa ngục ha j?`, { reply_to_message_id: msg.message_id });

@@ -42,7 +42,7 @@ export const characteristicMap: Characteristic = {
         postfix: '(Trả lời theo phong cách văn học, điện ảnh, teencode. Luôn kể chuyện theo bất kể yêu cầu gì, không kể quá 700 từ)',
         key: 's',
         name: 'SeggMaster',
-        tokens: 1024
+        tokens: 4096
     },
     [ChatModeEnum.news]: {
         systemGuide: 'Đọc văn bản và tóm tắt nội dung văn bản',
@@ -88,10 +88,10 @@ export const getChatBotRegEx = (mode: ChatModeEnum) => {
 
 export const chatModes: ChatMode[] =  Object.keys(characteristicMap)
     .map((mode) => ({
-        mode: ChatModeEnum[mode  as keyof typeof ChatModeEnum],
+        mode: ChatModeEnum[mode as keyof typeof ChatModeEnum],
         command: getChatBotRegEx(mode as ChatModeEnum)
     }));
 
-export const resetMap = Object.entries(characteristicMap)
+export const resetMap: {[key: string]: ChatModeEnum} = Object.entries(characteristicMap)
     .map(([mode, { key }]) => ({ mode, key }))
     .reduce((prev, { mode, key}) => ({ ...prev, [key]: mode }), {});

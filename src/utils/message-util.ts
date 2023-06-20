@@ -2,7 +2,7 @@ import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { GPTTokens, supportModelType } from "gpt-tokens";
 import { completeRequestConfig } from "../const/chatbot-config.const";
 
-const MODEL_LIMIT_TOKENS = 4096;
+const MODEL_LIMIT_TOKENS = 4096 * 4;
 
 const getUsedTokens = (messages: ChatMessage[], maxTokens: number): number => {
     const gptTokens = new GPTTokens({
