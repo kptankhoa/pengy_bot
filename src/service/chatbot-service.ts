@@ -70,7 +70,7 @@ export const setUpBot = () => {
             exist.push(toBeResetMode);
         });
         const resetModes = exist.join(', ');
-        console.log(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${resetModes}`);
+        console.info(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${resetModes}`);
         bot.sendMessage(chatId, `Cleared chat history in: ${resetModes}\nNot available: ${notExist.join(', ')}`, { reply_to_message_id: msg.message_id });
     };
 
@@ -166,5 +166,5 @@ export const setUpBot = () => {
         }
     });
 
-    console.log('---bot is running---');
+    console.info('---bot is running---');
 };

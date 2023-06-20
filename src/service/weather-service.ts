@@ -23,8 +23,8 @@ export const getWeatherRequest = (search: string, callback: (weatherObj: Simplif
     console.log(`-----weather: search: ${search}`);
     weather.find({ search, degreeType: 'C' }, (err: any, result: Weather[]) => {
         if (err || !result.length) {
-            console.log('------weather error-----')
-            console.log({ err, result });
+            console.error('------weather error-----')
+            console.error({ err, result });
             callback(null);
             return;
         }

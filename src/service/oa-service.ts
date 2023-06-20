@@ -18,12 +18,12 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
             const completion = await openai.createChatCompletion(request);
             return completion.data.choices[0].message?.content || defaultMessage;
         } catch (error: any) {
-            console.log('=====error, retries time: ' + retries);
+            console.error('-----error, retries time: ' + retries);
             if (error.response) {
-                console.log('status: ' + error.response.status);
-                console.log(error.response.data);
+                console.error('status: ' + error.response.status);
+                console.error(error.response.data);
             } else {
-                console.log('error message: ' + error.message);
+                console.error('error message: ' + error.message);
             }
             retries++;
         }
@@ -46,29 +46,4 @@ export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: ChatM
         ...completeRequestConfig
     };
     return getReplyMessage(completionRequest);
-}
-
-export const handleImageRequest = async (prompt: string) => {
-    let retries = 0;
-    const request: CreateImageRequest = {
-        prompt,
-        n: 1,
-        size: "512x512",
-        user: uuidv4()
-    }
-    while (retries < RETRY_TIMES) {
-        try {
-            const res = await openai.createImage(request);
-            return res.data.data[0].url;
-        } catch (error: any) {
-            if (error.response) {
-                console.log('status: ' + error.response.status);
-                console.log(error.response.data);
-            } else {
-                console.log('error message: ' + error.message);
-            }
-            retries++;
-        }
-    }
-    return null;
 }

@@ -13,7 +13,7 @@ export const getUrlContent = async (url: string) => {
             const article = new Readability(doc).parse();
             return article?.textContent;
         } catch(e) {
-            console.log('-----new url error ----, retries:' + retries);
+            console.error('-----ERROR: news url error ----, retries:' + retries);
             retries++;
         }
     }

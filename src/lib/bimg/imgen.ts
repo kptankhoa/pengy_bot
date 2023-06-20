@@ -34,7 +34,7 @@ const createSession = (authCookie: string) => {
 };
 
 const getImages = async (session: AxiosInstance, prompt: string) => {
-    console.log("Sending request...");
+    console.info("Sending request...");
     const urlEncodedPrompt = querystring.escape(prompt);
 
     const url = `${BING_URL}/images/create?q=${urlEncodedPrompt}&rt=3&FORM=GENCRE`; // force use rt=3
