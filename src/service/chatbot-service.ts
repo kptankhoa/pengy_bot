@@ -53,7 +53,7 @@ export const setUpBot = () => {
         chatHistories.set(historyId, chatHistory);
     };
 
-    const handleResetMessage = (msg: Message) => {
+    const handleResetMessage = async (msg: Message) => {
         const chatId = msg.chat.id;
         const text = msg.text.replace(BOT_COMMAND.RESET, '').trim();
         const modes = text.split(' ');
@@ -71,14 +71,18 @@ export const setUpBot = () => {
         });
         const resetModes = exist.join(', ');
         console.info(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${resetModes}`);
-        bot.sendMessage(chatId, `Cleared chat history in: ${resetModes}\nNot available: ${notExist.join(', ')}`, { reply_to_message_id: msg.message_id });
+        const res: Message = await bot.sendMessage(chatId, `Cleared chat history in: ${resetModes}\nNot available: ${notExist.join(', ')}`, { reply_to_message_id: msg.message_id });
+        botMessageIdMap.set(res.message_id, ChatModeEnum.no_reply);
+        lastInteractionModeMap.set(chatId, ChatModeEnum.no_reply);
     };
 
     const handleImageMessage = async (msg: Message) => {
         const chatId = msg.chat.id;
         const prompt = msg.text.replace(BOT_COMMAND.IMAGE, '').trim();
         const isPrivate = msg.chat.type === MessageType.PRIVATE;
-        bot.sendMessage(chatId, `Đang vẽ chờ xíu`, { reply_to_message_id: msg.message_id });
+        const res: Message = await bot.sendMessage(chatId, `Đang vẽ chờ xíu`, { reply_to_message_id: msg.message_id });
+        botMessageIdMap.set(res.message_id, ChatModeEnum.no_reply);
+        lastInteractionModeMap.set(chatId, ChatModeEnum.no_reply);
         bot.sendChatAction(chatId, 'typing');
         console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date()}`);
         console.log(`prompt: ${prompt}`)
@@ -90,7 +94,9 @@ export const setUpBot = () => {
             type: 'photo',
             media: url
         }))
-        bot.sendMediaGroup(chatId, medias, { reply_to_message_id: msg.message_id });
+        const res1: Message = await bot.sendMediaGroup(chatId, medias, { reply_to_message_id: msg.message_id });
+        botMessageIdMap.set(res1.message_id, ChatModeEnum.no_reply);
+        lastInteractionModeMap.set(chatId, ChatModeEnum.no_reply);
     }
 
     const handleWeatherMessage = async (msg: Message) => {
@@ -153,10 +159,13 @@ export const setUpBot = () => {
         }
 
         const replyToBotMode = replyMessageId ? botMessageIdMap.get(replyMessageId) : null;
-        if (replyToBotMode) {
+        if (replyToBotMode && replyToBotMode !== ChatModeEnum.no_reply) {
             return handleIncomingMessage(msg, replyToBotMode);
         }
         const lastInteractionMode = lastInteractionModeMap.get(chatId);
+        if (lastInteractionMode === ChatModeEnum.no_reply) {
+            return;
+        }
         lastInteractionMode ? handleIncomingMessage(msg, lastInteractionMode) : handleIncomingMessage(msg, ChatModeEnum.pengy);
     }
 

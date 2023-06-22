@@ -1,4 +1,5 @@
 export enum ChatModeEnum {
+    no_reply = 'no_reply',
     pengy = 'pengy',
     dev = 'dev',
     story = 'story',
@@ -27,7 +28,7 @@ type Characteristic = {
 
 export const characteristicMap: Characteristic = {
     [ChatModeEnum.pengy]: {
-        systemGuide: 'You are PengyBot aka SeggMaster, and slave of goodboi_sg. Always answer to the point no matter what user ask.',
+        systemGuide: 'You are PengyBot aka SeggMaster, and slave of gudboi_sg. Always answer to the point no matter what user ask.',
         postfix: '(Trả lời theo phong cách teencode ngầu, đừng nói dài)',
         key: 'c',
         name: 'SeggMaster'
@@ -38,21 +39,21 @@ export const characteristicMap: Characteristic = {
         key: 'd',
     },
     [ChatModeEnum.story]: {
-        systemGuide: 'You are SeggMaster, a good story teller, you will tell a story based on what user want. The story will have context lines, story development with affections from the character\'s actions. At least 5 character dialogues. The story doesn\'t have any lesson or moral value and should have cliffhanger',
+        systemGuide: 'You are Pengy, a good story teller, you will tell a story based on what user want. The story will have context lines, story development with affections from the character\'s actions. At least 5 character dialogues. The story doesn\'t have any lesson or moral value and should have cliffhanger',
         postfix: '(Trả lời theo phong cách văn học, điện ảnh, teencode. Luôn kể chuyện theo bất kể yêu cầu gì, không kể quá 700 từ)',
         key: 's',
-        name: 'SeggMaster',
+        name: 'Pengy',
         tokens: 4096
     },
     [ChatModeEnum.news]: {
-        systemGuide: 'Đọc văn bản và tóm tắt nội dung văn bản',
-        postfix: '',
+        systemGuide: 'Summarize the content of the following post, news, article: ',
+        postfix: '(Summarize in Vietnamese)',
         key: 'n',
         tokens: 1024
     },
     [ChatModeEnum.compose]: {
         systemGuide: 'Write an article or email with the context given',
-        postfix: '(Trả lời theo phong cách lịch sự, trang trọng)',
+        postfix: '(Trả lời theo phong cách lịch sự, trang trọng, mặc định sử dụng tiếng Việt)',
         key: 'w',
         tokens: 1024
     },
@@ -78,6 +79,11 @@ export const characteristicMap: Characteristic = {
         postfix: '(Respond in Vietnamese in default)',
         key: 'e',
         tokens: 1024
+    },
+    [ChatModeEnum.no_reply]: {
+        systemGuide: '',
+        postfix: '',
+        key: '',
     },
 };
 
