@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 import querystring from "querystring";
 import { performance } from "perf_hooks";
-import { bingImageCookie } from "../../const/chatbot-config.const";
+import { bingImageCookie } from "../../const/settings/chatbot-config.const";
 
 const BING_URL = "https://www.bing.com";
 

@@ -1,11 +1,11 @@
-import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage } from "../const/chatbot-config.const";
+import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage } from "../const/settings/chatbot-config.const";
 import { ChatMessage } from "../model/chat-message";
 import { v4 as uuidv4 } from 'uuid';
 import { characteristicMap, ChatModeEnum } from "../const/characteristics";
 import { CreateChatCompletionRequest } from "openai/api";
 import { CreateImageRequest, Configuration, OpenAIApi } from "openai";
 import { getMessagesByTokens } from "../utils/message-util";
-import { RETRY_TIMES } from "../const/settings";
+import { RETRY_TIMES } from "../const/settings/settings";
 
 const configuration = new Configuration({ apiKey });
 

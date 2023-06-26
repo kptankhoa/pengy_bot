@@ -1,4 +1,4 @@
-import { RETRY_TIMES } from "../const/settings";
+import { RETRY_TIMES } from "../const/settings/settings";
 import { generateImagesLinks } from "../lib/bimg/imgen";
 
 export const handleImageRequest = async (prompt: string): Promise<string[] | null> => {

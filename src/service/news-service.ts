@@ -1,5 +1,5 @@
 import { Readability } from "@mozilla/readability";
-import { RETRY_TIMES } from "../const/settings";
+import { RETRY_TIMES } from "../const/settings/settings";
 import axios from "axios";
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
