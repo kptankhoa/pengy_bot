@@ -14,7 +14,7 @@ export const dictUsage: {[key in DictCommand]: {
         usage: 'list all words'
     },
     [DictCommand.add]: {
-        params: '[word]:[type]:[meaning]',
+        params: '[word]:[type]:[meaning]:[synonym]',
         usage: 'add new word'
     },
     [DictCommand.find]: {
@@ -22,6 +22,7 @@ export const dictUsage: {[key in DictCommand]: {
         usage: 'find a word'
     },
     [DictCommand.delete]: {
+        params: '[word]',
         usage: 'delete a word'
     },
     [DictCommand.help]: {

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { collection, doc, getDoc, getDocs, getFirestore } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc } from "firebase/firestore";
 import { firebaseConfig } from "../const/settings/firebase-config";
 import { collectionName } from "../const/firebase/collection-name";
 import { DictWord } from "../model/dict-word";
@@ -27,4 +27,13 @@ export const findWord = async (word: string) => {
     } else {
         return null;
     }
-}
+};
+
+export const createWord = async (word: DictWord) => {
+    const docRef = doc(db, collectionName.dictionary, word.word);
+    await setDoc(docRef, word);
+};
+
+export const removeWord = async (word: string)=> {
+    await deleteDoc(doc(db, collectionName.dictionary, word));
+};

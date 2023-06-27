@@ -1,6 +1,6 @@
 import { Message } from "../../model/message";
 import { BOT_COMMAND } from "../../const/chat/bot-command";
-import { findWord, getDictionary } from "../../service/firebase-service";
+import { createWord, findWord, getDictionary, removeWord } from "../../service/firebase-service";
 import { dictCommandMapping, dictUsage } from "../../const/firebase/dict-command";
 import { DictWord } from "../../model/dict-word";
 import { ChatModeEnum } from "../../const/chat/characteristics";
@@ -17,13 +17,14 @@ const getHelp = () => {
     const usage = Object.entries(dictUsage)
         .map(([key, usage]) => `${key}${usage.params ? `\t${usage.params}`: ''}:\t\t${usage.usage}`)
         .join('\n');
+
     return `${description}\n${usageLine}\n${commandListLine}\n${usage}`;
 };
 
 const getWords = async () => {
     const wordList: DictWord[] = await getDictionary();
-
     const getSynonyms = (synonym: DictWord['synonym']) =>  synonym?.length ? `\tTừ đồng nghĩa: ${synonym.join(', ')}.` : '';
+
     return wordList.map(({ word, type, meaning, synonym}, index) => `${index + 1}. ${word} (${type}): ${meaning}.${getSynonyms(synonym)}`).join('\n');
 }
 
@@ -41,19 +42,62 @@ const getWord = async (text: string) => {
         }
     ];
     return await handleMessageRequest(chatHistory, ChatModeEnum.empty);
+};
+
+const deleteWord = async (text: string)=> {
+    const search = text.replace(dictCommandMapping.delete, '').trim();
+
+    await removeWord(search);
+
+    return `Đã xóa từ ${search}`;
 }
 
+const addWord = async (text: string) => {
+    const newWordStr = text.replace(dictCommandMapping.add, '').trim();
+    const [word, type, meaning, synonym] = newWordStr.split(':');
+
+    const newWord: DictWord = {
+        word,
+        type,
+        meaning,
+        synonym: synonym ? [...synonym.split(',')] : undefined
+    } as DictWord;
+    if (!synonym?.length) {
+        delete newWord.synonym;
+    }
+
+    await createWord(newWord);
+
+    const chatHistory: ChatMessage[] = [
+        {
+            content: getWordUsagePrompt(newWord),
+            role: RoleEnum.USER
+        }
+    ];
+    return `Đã thêm từ mới: ${word}\n` + await handleMessageRequest(chatHistory, ChatModeEnum.empty)
+};
+
 const getReplyMessage = async (text: string): Promise<string> => {
-    console.log(text);
     if (!text || dictCommandMapping.all.test(text)) {
         return await getWords();
     }
+
     if (dictCommandMapping.help.test(text)) {
         return getHelp();
     }
+
     if (dictCommandMapping.find.test(text)) {
         return getWord(text);
     }
+
+    if (dictCommandMapping.add.test(text)) {
+        return addWord(text);
+    }
+
+    if (dictCommandMapping.delete.test(text)) {
+        return deleteWord(text);
+    }
+
     return getDefaultMessage();
 }
 

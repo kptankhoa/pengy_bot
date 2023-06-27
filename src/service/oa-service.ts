@@ -3,9 +3,11 @@ import { ChatMessage } from "../model/chat-message";
 import { v4 as uuidv4 } from 'uuid';
 import { characteristicMap, ChatModeEnum } from "../const/chat/characteristics";
 import { CreateChatCompletionRequest } from "openai/api";
-import { CreateImageRequest, Configuration, OpenAIApi } from "openai";
+import { Configuration, OpenAIApi } from "openai";
 import { getMessagesByTokens } from "../utils/message-util";
 import { RETRY_TIMES } from "../const/settings/settings";
+import { getPengyPrompt } from "../const/prompts";
+import { getDictionary } from "./firebase-service";
 
 const configuration = new Configuration({ apiKey });
 
@@ -31,8 +33,9 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
     return defaultMessage;
 };
 
-export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: ChatModeEnum) => {
-    const { systemGuide, postfix, tokens } = characteristicMap[chatMode];
+export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode: ChatModeEnum) => {
+    const { systemGuide: guide, postfix, tokens } = characteristicMap[chatMode];
+    const systemGuide = chatMode === ChatModeEnum.pengy ? getPengyPrompt(await getDictionary()) : guide;
     const maxTokens = tokens || defaultMaxTokens;
     const messages = getMessagesByTokens(chatHistory, maxTokens, systemGuide, postfix);
 
