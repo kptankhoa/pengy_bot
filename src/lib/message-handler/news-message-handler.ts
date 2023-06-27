@@ -1,8 +1,8 @@
-import { Message } from "../model/message";
-import { BOT_COMMAND } from "../const/bot-command";
-import { ChatModeEnum } from "../const/characteristics";
-import { isUrl } from "../utils/common-util";
-import { getUrlContent } from "../service/news-service";
+import { Message } from "../../model/message";
+import { BOT_COMMAND } from "../../const/chat/bot-command";
+import { ChatModeEnum } from "../../const/chat/characteristics";
+import { isUrl } from "../../utils/common-util";
+import { getUrlContent } from "../../service/news-service";
 import { handleChatMessage } from "./chat-message-handler";
 
 export const onNewsMessage = async (bot: any, msg: Message) => {

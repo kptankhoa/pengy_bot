@@ -1,7 +1,7 @@
-import { telegramToken } from "../const/settings/chatbot-config.const";
+import { telegramToken } from "../const/settings/chatbot-config";
 import { Message } from "../model/message";
-import { BOT_COMMAND } from "../const/bot-command";
-import { getMessageHandler } from "../message-handler";
+import { BOT_COMMAND } from "../const/chat/bot-command";
+import { getMessageHandler } from "../lib/message-handler";
 
 const TelegramBot = require("node-telegram-bot-api");
 
@@ -26,6 +26,10 @@ export const setUpBot = () => {
 
         if (BOT_COMMAND.NEWS.test(chatText)) {
             return messageHandler.onNews(msg);
+        }
+
+        if (BOT_COMMAND.DICT.test(chatText)) {
+            return messageHandler.onDictionary(msg);
         }
 
         return messageHandler.onNewMessage(msg);

@@ -1,7 +1,7 @@
-import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage } from "../const/settings/chatbot-config.const";
+import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage } from "../const/settings/chatbot-config";
 import { ChatMessage } from "../model/chat-message";
 import { v4 as uuidv4 } from 'uuid';
-import { characteristicMap, ChatModeEnum } from "../const/characteristics";
+import { characteristicMap, ChatModeEnum } from "../const/chat/characteristics";
 import { CreateChatCompletionRequest } from "openai/api";
 import { CreateImageRequest, Configuration, OpenAIApi } from "openai";
 import { getMessagesByTokens } from "../utils/message-util";
