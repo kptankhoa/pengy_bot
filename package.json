@@ -4,10 +4,11 @@
   "description": "chillax goodboi bot vui ve",
   "main": "src/index.ts",
   "scripts": {
-    "start": "npm run build && node build/index.js",
+    "start": "npm run build && node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
     "dev": "nodemon src/index.ts",
     "build": "rimraf ./build && tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .ts,.tsx --fix"
   },
   "author": "kptankhoa",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "@mozilla/readability": "^0.4.4",
     "axios": "^1.4.0",
     "dotenv": "^16.0.3",
+    "eslint-import-resolver-typescript": "^3.5.5",
     "express": "^4.18.2",
     "firebase": "^9.23.0",
     "jsdom": "^16.7.0",
@@ -26,10 +28,15 @@
   "devDependencies": {
     "@types/node": "^20.1.4",
     "@types/uuid": "^9.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "eslint": "^8.43.0",
+    "eslint-plugin-import": "^2.27.5",
     "gpt-tokens": "^1.0.8",
     "nodemon": "^2.0.22",
     "rimraf": "^5.0.0",
     "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.0.4"
   }
 }

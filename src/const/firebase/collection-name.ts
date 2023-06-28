@@ -1,3 +1,3 @@
 export const collectionName = {
-    dictionary: 'dictionary'
-}
+  dictionary: 'dictionary'
+};
