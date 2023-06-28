@@ -1,3 +1,3 @@
-import { setUpBot } from './service/chatbot-service';
+import { setUpBot } from 'libs/chatbot';
 
 setUpBot();

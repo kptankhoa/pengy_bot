@@ -1,3 +1,5 @@
 export const collectionName = {
-  dictionary: 'dictionary'
+  dictionary: 'dictionary',
+  chat_bot: 'chat_bots',
+  other_config: 'other_configs'
 };

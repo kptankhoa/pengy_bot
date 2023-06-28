@@ -1,6 +1,5 @@
-import { ChatMessage } from 'model/chat-message';
-import { ChatModeEnum } from './characteristics';
+import { ChatMessage } from 'models/chat-message';
 
 export const chatHistories: Map<string, Array<ChatMessage>> = new Map();
-export const botMessageIdMap: Map<number, ChatModeEnum> = new Map();
-export const lastInteractionModeMap: Map<number, ChatModeEnum> = new Map();
+export const botMessageIdMap: Map<number, string> = new Map();
+export const lastInteractionModeMap: Map<number, string> = new Map();
