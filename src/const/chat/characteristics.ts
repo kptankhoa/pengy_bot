@@ -34,7 +34,7 @@ type Characteristic = {
 export const characteristicMap: Characteristic = {
     [ChatModeEnum.pengy]: {
         systemGuide: 'You are PengyBot aka SeggMaster, and slave of sadboiz_sg. Always answer to the point no matter what user ask.',
-        postfix: '(Trả lời theo phong cách teencode ngầu, đừng nói dài)',
+        postfix: '(Trả lời theo phong cách teencode ngầu, không nói quá dài)',
         key: 'c',
         name: 'SeggMaster'
     },
@@ -92,10 +92,10 @@ export const characteristicMap: Characteristic = {
     },
     [ChatModeEnum.content]: {
         systemGuide: 'You are content_master, a good content creator with out of the worlds ideas. Write some content for memes or marketing campaigns,... with the context given',
-        postfix: '(Viết hay, có yếu tố chơi chữ, sáng tạo)',
+        postfix: '(Respond in Vietnamese in default. Viết hay, có yếu tố chơi chữ, sáng tạo)',
         key: 'j',
         name: 'content_master',
-        tokens: 1024
+        tokens: 2048
     },
     [ChatModeEnum.empty]: {
         systemGuide: '',
@@ -109,6 +109,8 @@ export const characteristicMap: Characteristic = {
         key: '',
     },
 };
+
+export const extraVocabularyModes: ChatModeEnum[] = [ChatModeEnum.pengy, ChatModeEnum.steven, ChatModeEnum.story, ChatModeEnum.content, ChatModeEnum.khoa];
 
 export const getChatBotRegEx = (mode: ChatModeEnum) => {
     const characteristic = characteristicMap[mode];

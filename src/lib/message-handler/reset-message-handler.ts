@@ -2,7 +2,7 @@ import { BOT_COMMAND } from "../../const/chat/bot-command";
 import { ChatModeEnum, resetMap } from "../../const/chat/characteristics";
 import { botMessageIdMap, chatHistories, lastInteractionModeMap } from "../../const/chat/chat-mappings";
 import { Message } from "../../model/message";
-import { getChatHistoryKey } from "../../utils/common-util";
+import { getChatHistoryKey } from "../../util/common-util";
 
 export const onResetMessage = async (bot: any, msg: Message) => {
     const chatId = msg.chat.id;

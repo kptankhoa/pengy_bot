@@ -1,5 +1,5 @@
 import { SimplifiedWeather, Weather } from "../model/weather";
-import { simplifyWeatherObject } from "../utils/weather-util";
+import { simplifyWeatherObject } from "../util/weather-util";
 import { ChatMessage, RoleEnum } from "../model/chat-message";
 import { handleMessageRequest } from "./oa-service";
 import { ChatModeEnum } from "../const/chat/characteristics";

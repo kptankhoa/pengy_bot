@@ -1,7 +1,7 @@
 import { Message } from "../../model/message";
 import { BOT_COMMAND } from "../../const/chat/bot-command";
 import { ChatModeEnum } from "../../const/chat/characteristics";
-import { isUrl } from "../../utils/common-util";
+import { isUrl } from "../../util/common-util";
 import { getUrlContent } from "../../service/news-service";
 import { handleChatMessage } from "./chat-message-handler";
 

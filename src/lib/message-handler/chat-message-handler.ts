@@ -4,7 +4,7 @@ import { botMessageIdMap, chatHistories, lastInteractionModeMap } from "../../co
 import { defaultBotName } from "../../const/settings/chatbot-config";
 import { RoleEnum } from "../../model/chat-message";
 import { handleMessageRequest } from "../../service/oa-service";
-import { getChatHistoryKey } from "../../utils/common-util";
+import { getChatHistoryKey } from "../../util/common-util";
 
 export const handleChatMessage = async (bot: any, msg: Message, mode: ChatModeEnum) => {
     const chatId = msg.chat.id;

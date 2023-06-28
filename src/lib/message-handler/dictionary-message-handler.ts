@@ -1,12 +1,9 @@
 import { Message } from "../../model/message";
 import { BOT_COMMAND } from "../../const/chat/bot-command";
-import { createWord, findWord, getDictionary, removeWord } from "../../service/firebase-service";
+import { createWord, findWord, getDictionary, removeWord } from "../../service/dictionary-service";
 import { dictCommandMapping, dictUsage } from "../../const/firebase/dict-command";
 import { DictWord } from "../../model/dict-word";
-import { ChatModeEnum } from "../../const/chat/characteristics";
-import { ChatMessage, RoleEnum } from "../../model/chat-message";
-import { getWordUsagePrompt } from "../../const/prompts";
-import { handleMessageRequest } from "../../service/oa-service";
+import { printWords } from "../../util/dict-util";
 
 const getDefaultMessage = () => "No command recognized, use -help to show available commands.";
 
@@ -15,33 +12,27 @@ const getHelp = () => {
     const usageLine = 'USAGE: /dict [command] [options?]';
     const commandListLine = 'Command list:';
     const usage = Object.entries(dictUsage)
-        .map(([key, usage]) => `${key}${usage.params ? `\t${usage.params}`: ''}:\t\t${usage.usage}`)
+        .map(([key, usage]) => `${key}${usage.params ? `\t${usage.params}`: ''}:\t${usage.purpose}`)
         .join('\n');
 
     return `${description}\n${usageLine}\n${commandListLine}\n${usage}`;
 };
 
-const getWords = async () => {
-    const wordList: DictWord[] = await getDictionary();
-    const getSynonyms = (synonym: DictWord['synonym']) =>  synonym?.length ? `\tTừ đồng nghĩa: ${synonym.join(', ')}.` : '';
+const getWords = () => {
+    const wordList: DictWord[] = getDictionary();
 
-    return wordList.map(({ word, type, meaning, synonym}, index) => `${index + 1}. ${word} (${type}): ${meaning}.${getSynonyms(synonym)}`).join('\n');
+    return printWords(wordList);
 }
 
-const getWord = async (text: string) => {
+const getWord = (text: string) => {
     const search = text.replace(dictCommandMapping.find, '').trim();
-    const word: DictWord | null = await findWord(search);
+    const words: DictWord[] | null = findWord(search);
 
-    if (!word) {
-        return "Ngôn ngữ của bạn không có từ này rui."
+    if (!words) {
+        return `Không tìm kết quả cho ${search}.`;
     }
-    const chatHistory: ChatMessage[] = [
-        {
-            content: getWordUsagePrompt(word),
-            role: RoleEnum.USER
-        }
-    ];
-    return await handleMessageRequest(chatHistory, ChatModeEnum.empty);
+
+    return `Kết quả tìm kiếm cho ${search}:\n${printWords(words)}`;
 };
 
 const deleteWord = async (text: string)=> {
@@ -57,29 +48,24 @@ const addWord = async (text: string) => {
     const [word, type, meaning, synonym] = newWordStr.split(':');
 
     const newWord: DictWord = {
-        word,
-        type,
-        meaning,
-        synonym: synonym ? [...synonym.split(',')] : undefined
+        word: word.trim(),
+        type: type.trim(),
+        meaning: meaning.trim(),
+        synonym: synonym ? [...synonym.split(',').map((s => s.trim()))] : undefined
     } as DictWord;
+
     if (!synonym?.length) {
         delete newWord.synonym;
     }
 
     await createWord(newWord);
 
-    const chatHistory: ChatMessage[] = [
-        {
-            content: getWordUsagePrompt(newWord),
-            role: RoleEnum.USER
-        }
-    ];
-    return `Đã thêm từ mới: ${word}\n` + await handleMessageRequest(chatHistory, ChatModeEnum.empty)
+    return `Đã thêm từ mới: ${word}`;
 };
 
 const getReplyMessage = async (text: string): Promise<string> => {
     if (!text || dictCommandMapping.all.test(text)) {
-        return await getWords();
+        return getWords();
     }
 
     if (dictCommandMapping.help.test(text)) {

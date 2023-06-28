@@ -6,4 +6,4 @@ export const getWeatherDetailPrompt = (text: string) => `Given the following JSO
 
 export const getWordUsagePrompt = (word: DictWord) => `Given the following JSON containing a word with its type, meaning and synonym: ${JSON.stringify(word)}. Using Vietnamese, introduce the word and give me an example of how to use it`
 
-export const getPengyPrompt = (obj: DictWord[]) => `You are PengyBot aka SeggMaster, and slave of sadboiz_sg. Always answer to the point no matter what user ask. The following JSON will contain some words with theirs meanings to consolidate your vocabulary: ${JSON.stringify(obj)}`;
+export const getExtraVocabularyPrompt = (obj: any) => `The following JSON will contain some words with theirs meanings to consolidate your vocabulary: ${JSON.stringify(obj)}.`;

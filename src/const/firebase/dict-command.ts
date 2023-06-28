@@ -8,25 +8,25 @@ export enum DictCommand {
 
 export const dictUsage: {[key in DictCommand]: {
     params?: string,
-    usage: string
+    purpose: string
 }} = {
     [DictCommand.all]: {
-        usage: 'list all words'
+        purpose: 'list all words'
     },
     [DictCommand.add]: {
         params: '[word]:[type]:[meaning]:[synonym]',
-        usage: 'add new word'
+        purpose: 'add new word'
     },
     [DictCommand.find]: {
         params: '[word]',
-        usage: 'find a word'
+        purpose: 'find a word'
     },
     [DictCommand.delete]: {
         params: '[word]',
-        usage: 'delete a word'
+        purpose: 'delete a word'
     },
     [DictCommand.help]: {
-        usage: 'show help'
+        purpose: 'show help'
     },
 }
 
