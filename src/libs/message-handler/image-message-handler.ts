@@ -1,5 +1,5 @@
 import { Message, MessageType } from 'models';
-import { BOT_COMMAND, botMessageIdMap, ChatModeEnum, lastInteractionModeMap } from 'const/chat';
+import { BOT_COMMAND, botMessageIdMap, lastInteractionModeMap } from 'const/chat';
 import { handleImageRequest } from 'services';
 
 export const onImageMessage = async (bot: any, msg: Message) => {
@@ -8,8 +8,8 @@ export const onImageMessage = async (bot: any, msg: Message) => {
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
 
   const res: Message = await bot.sendMessage(chatId, 'Đang vẽ chờ xíu', { reply_to_message_id: msg.message_id });
-  botMessageIdMap.set(res.message_id, ChatModeEnum.no_reply);
-  lastInteractionModeMap.set(chatId, ChatModeEnum.no_reply);
+  botMessageIdMap.set(res.message_id, 'no_reply');
+  lastInteractionModeMap.set(chatId, 'no_reply');
 
   bot.sendChatAction(chatId, 'typing');
 
@@ -26,6 +26,6 @@ export const onImageMessage = async (bot: any, msg: Message) => {
   }));
   const res1: Message = await bot.sendMediaGroup(chatId, medias, { reply_to_message_id: msg.message_id });
 
-  botMessageIdMap.set(res1.message_id, ChatModeEnum.no_reply);
-  lastInteractionModeMap.set(chatId, ChatModeEnum.no_reply);
+  botMessageIdMap.set(res1.message_id, 'no_reply');
+  lastInteractionModeMap.set(chatId, 'no_reply');
 };

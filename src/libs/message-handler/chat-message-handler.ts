@@ -1,5 +1,5 @@
 import { Message } from 'models';
-import { botMessageIdMap, ChatModeEnum, lastInteractionModeMap } from 'const/chat';
+import { botMessageIdMap, lastInteractionModeMap } from 'const/chat';
 import { chatModes } from 'services';
 import { handleChatMessage } from 'libs/message-handler/handle-text-message';
 
@@ -14,14 +14,14 @@ export const onIncomingMessage = (bot: any, msg: Message) => {
   }
 
   const replyToBotMode = replyMessageId ? botMessageIdMap.get(replyMessageId) : null;
-  if (replyToBotMode && replyToBotMode !== ChatModeEnum.no_reply) {
+  if (replyToBotMode && replyToBotMode !== 'no_reply') {
     return handleChatMessage(bot, msg, replyToBotMode);
   }
 
   const lastInteractionMode = lastInteractionModeMap.get(chatId);
-  if (lastInteractionMode === ChatModeEnum.no_reply) {
+  if (lastInteractionMode === 'no_reply') {
     return;
   }
 
-  lastInteractionMode ? handleChatMessage(bot, msg, lastInteractionMode) : handleChatMessage(bot, msg, ChatModeEnum.pengy);
+  lastInteractionMode ? handleChatMessage(bot, msg, lastInteractionMode) : handleChatMessage(bot, msg, 'pengy');
 };

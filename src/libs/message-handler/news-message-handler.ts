@@ -1,12 +1,12 @@
 import { Message } from 'models';
-import { BOT_COMMAND, ChatModeEnum } from 'const/chat';
+import { BOT_COMMAND } from 'const/chat';
 import { isUrl } from 'utils';
 import { handleChatMessage } from 'libs/message-handler/handle-text-message';
 import { getUrlContent } from 'services';
 
 export const onNewsMessage = async (bot: any, msg: Message) => {
   const chatContent = msg.text.replace(BOT_COMMAND.NEWS, '').trim();
-  const mode = ChatModeEnum.news;
+  const mode = 'news';
   if (!isUrl(chatContent)) {
     return handleChatMessage(bot, msg, mode);
   }

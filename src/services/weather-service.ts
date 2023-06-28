@@ -1,7 +1,6 @@
 import { ChatMessage, RoleEnum, SimplifiedWeather, Weather } from 'models';
 import { getWeatherLocationPrompt } from 'const/prompts';
 import { handleMessageRequest } from 'services';
-import { ChatModeEnum } from 'const/chat';
 import { simplifyWeatherObject } from 'utils';
 
 const weather = require('weather-js');
@@ -13,7 +12,7 @@ export const getWeatherLocation = async (msg: string)=> {
       role: RoleEnum.USER
     }
   ];
-  return await handleMessageRequest(chatHistory, ChatModeEnum.empty);
+  return await handleMessageRequest(chatHistory, 'empty');
 };
 
 export const getWeatherRequest = (search: string, callback: (weatherObj: SimplifiedWeather | null) => void) => {

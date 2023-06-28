@@ -1,5 +1,5 @@
 import { Message } from 'models';
-import { BOT_COMMAND, ChatModeEnum } from 'const/chat';
+import { BOT_COMMAND } from 'const/chat';
 import { getWeatherLocation, handleWeatherRequest } from 'services';
 import { getWeatherDetailPrompt } from 'const/prompts';
 import { defaultMessage } from 'const/settings';
@@ -21,7 +21,7 @@ export const onWeatherMessage = async (bot: any, msg: Message) => {
       ...msg,
       text: `${weatherPrompt}\n${JSON.stringify(weatherObject, null, 2)}`.trim()
     };
-    handleChatMessage(bot, newMsg, ChatModeEnum.pengy);
+    handleChatMessage(bot, newMsg, 'pengy');
   };
 
   handleWeatherRequest(location.substring(0, location.length - 1), sendWeatherMsgCallback);

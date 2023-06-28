@@ -5,12 +5,12 @@ import { getChatBot, getChatBotRegEx, handleMessageRequest } from 'services';
 
 export const handleChatMessage = async (bot: any, msg: Message, mode: string) => {
   const chatId = msg.chat.id;
-  const historyId = getChatHistoryKey(mode, chatId);
+  const chatBot = getChatBot(mode);
+  const historyId = getChatHistoryKey(chatBot.id, chatId);
   const chatHistory = chatHistories.get(historyId) || [];
 
   const chatContent = msg.text?.startsWith('/') ? msg.text.replace(getChatBotRegEx(mode), '').trim() : msg.text;
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
-  const botName = getChatBot(mode).name;
 
   console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date()}`);
   bot.sendChatAction(chatId, 'typing');
@@ -22,11 +22,11 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
 
   const replyContent = await handleMessageRequest(chatHistory, mode);
   console.log('------output------');
-  console.log(`${botName}: ${replyContent}`);
+  console.log(`${chatBot.name}: ${replyContent}`);
 
   const res: Message = await bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
   chatHistory.push({
-    name: botName,
+    name: chatBot.name,
     content: replyContent,
     role: RoleEnum.ASSISTANT
   });
