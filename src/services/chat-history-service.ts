@@ -31,12 +31,8 @@ export const addNewMessage = async (chatId: number, mode: string, msgId: string,
   const chatHistory = chatHistoryMap.get(historyId) || [];
   const messageRef = doc(db, collectionName.chat_history, historyId, collectionName.message, msgId);
   const historyRef = doc(db, collectionName.chat_history, historyId);
-  const batch = writeBatch(db);
   await setDoc(messageRef, { ...msg, updatedAt: timestamp });
-  await batch.update(historyRef, {
-    updatedAt: Date.now()
-  });
-  await batch.commit();
+  await setDoc(historyRef, { updatedAt: timestamp });
   chatHistory.push(msg);
   chatHistoryMap.set(historyId, chatHistory);
 };
