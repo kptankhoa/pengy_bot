@@ -1,3 +1,4 @@
+export * from './chat-history-service';
 export * from './chatbot-service';
 export * from './dictionary-service';
 export * from './imggen-service';

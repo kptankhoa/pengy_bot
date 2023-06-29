@@ -1,5 +1,6 @@
-export type remoteConfigKey = 'extraVocabModes';
+export type remoteConfigKey = 'extraVocabModes' | 'useExtraVocab';
 
 export interface FirebaseRemoteConfig {
-  extraVocabModes: string[]
+  extraVocabModes: string[],
+  useExtraVocab: boolean
 }

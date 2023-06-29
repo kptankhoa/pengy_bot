@@ -8,4 +8,5 @@ export interface ChatMessage {
     role: RoleEnum,
     content: string;
     name?: string;
+    updatedAt?: number;
 }

@@ -5,7 +5,7 @@ import { getChatBot, getDictionary } from 'services';
 import { getMessagesByTokens, printWithoutWord } from 'utils';
 import { getExtraVocabularyPrompt } from 'const/prompts';
 import { ChatMessage } from 'models';
-import { extraVocabularyModes } from 'libs/firebase';
+import { extraVocabModes, useExtraVocab } from 'libs/firebase';
 
 const configuration = new Configuration({ apiKey });
 
@@ -14,7 +14,7 @@ const openai = new OpenAIApi(configuration);
 const buildSystemGuide = (mode: string): string => {
   const { systemGuide } = getChatBot(mode);
   let guide;
-  if (extraVocabularyModes().includes(mode)) {
+  if (useExtraVocab() && extraVocabModes().includes(mode)) {
     const dictWords = getDictionary();
     const vocabs = dictWords.reduce((prev, curr) => ({ ...prev, [curr.word]: printWithoutWord(curr)}), {});
     guide = systemGuide.concat(getExtraVocabularyPrompt(vocabs));

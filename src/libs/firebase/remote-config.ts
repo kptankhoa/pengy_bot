@@ -15,4 +15,6 @@ onSnapshot(configDocRef, (config) => {
     .map(([key, value]) => configMap.set(key as remoteConfigKey, value));
 });
 
-export const extraVocabularyModes = (): string[] => configMap.get('extraVocabModes');
+export const extraVocabModes = (): string[] => configMap.get('extraVocabModes');
+
+export const useExtraVocab = (): boolean => configMap.get('useExtraVocab');

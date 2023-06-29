@@ -1,7 +1,7 @@
 import { Message } from 'models';
-import { BOT_COMMAND, botMessageIdMap, chatHistories, lastInteractionModeMap } from 'const/chat';
+import { BOT_COMMAND, botMessageIdMap, lastInteractionModeMap } from 'const/chat';
 import { resetMap } from 'services';
-import { getChatHistoryKey } from 'utils';
+import { resetChatHistory } from 'services/chat-history-service';
 
 export const onResetMessage = async (bot: any, msg: Message) => {
   const chatId = msg.chat.id;
@@ -11,16 +11,16 @@ export const onResetMessage = async (bot: any, msg: Message) => {
   const exist: string[] = [];
   const notExist: string[] = [];
 
-  modes.forEach((modeKey) => {
+  const promises = modes.map(async (modeKey) => {
     const toBeResetMode = resetMap()[modeKey];
     if (!toBeResetMode) {
       notExist.push(modeKey);
       return;
     }
-    const historyId = getChatHistoryKey(toBeResetMode, chatId);
-    chatHistories.set(historyId, []);
+    await resetChatHistory(chatId, toBeResetMode);
     exist.push(toBeResetMode);
   });
+  await Promise.all(promises);
   const resetModes = exist.join(', ');
 
   console.info(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${resetModes}`);
