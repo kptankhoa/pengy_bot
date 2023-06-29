@@ -1,6 +1,12 @@
 import { ChatMessage, Message, MessageType, RoleEnum } from 'models';
-import { botMessageIdMap, lastInteractionModeMap } from 'const/chat';
-import { addNewMessage, getChatBot, getChatBotRegEx, getChatHistory, handleMessageRequest } from 'services';
+import {
+  addNewMessage,
+  getChatBot,
+  getChatBotRegEx,
+  getChatHistory,
+  handleMessageRequest, setBotReplyIdMode,
+  setLastInteractionMode
+} from 'services';
 
 export const handleChatMessage = async (bot: any, msg: Message, mode: string) => {
   const chatId = msg.chat.id;
@@ -32,9 +38,8 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
     role: RoleEnum.ASSISTANT
   };
 
-  await addNewMessage(chatId, chatBot.id, msg.message_id.toString(), newUserMsg, receivedTime);
-  await addNewMessage(chatId, chatBot.id, res.message_id.toString(), newBotMessage, repliedTime);
-
-  botMessageIdMap.set(res.message_id, mode);
-  lastInteractionModeMap.set(chatId, mode);
+  await addNewMessage(chatId, chatBot.id, msg.message_id, newUserMsg, receivedTime);
+  await addNewMessage(chatId, chatBot.id, res.message_id, newBotMessage, repliedTime);
+  await setBotReplyIdMode(chatId, res.message_id, mode);
+  await setLastInteractionMode(chatId, mode);
 };
