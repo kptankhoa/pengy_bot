@@ -14,6 +14,7 @@ export const getChatHistory = async (chatId: number, mode: string): Promise<Chat
   const historyId = getChatHistoryKey(chatId, mode);
   const chatHistory = chatHistoryMap.get(historyId);
   if (chatHistory) {
+    console.log(chatHistory.length)
     return chatHistory;
   }
   console.info(`fetch history for ${historyId}`);
@@ -34,8 +35,8 @@ export const addNewMessage = async (chatId: number, mode: string, msgId: number,
   const historyRef = doc(db, collectionName.chat_history, historyId);
   await setDoc(messageRef, { ...msg, updatedAt: timestamp });
   await setDoc(historyRef, { updatedAt: timestamp });
-  chatHistory.push(msg);
-  chatHistoryMap.set(historyId, chatHistory);
+  const newChatHistory: ChatMessage[] = [...chatHistory.splice(chatHistory.length - MESSAGE_LIMIT + 1), msg];
+  chatHistoryMap.set(historyId, newChatHistory);
 };
 
 export const resetChatHistory = async (chatId: number, mode: string) => {

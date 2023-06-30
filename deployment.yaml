@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: chillax-goodboi
-  name: chillax-goodboi-deployment
+    app: pengy-bot
+  name: pengy-bot-deployment
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -11,7 +11,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: chillax-goodboi
+      app: pengy-bot
   strategy:
     rollingUpdate:
       maxSurge: 0%
@@ -20,12 +20,12 @@ spec:
   template:
     metadata:
       labels:
-        app: chillax-goodboi
+        app: pengy-bot
     spec:
       nodeSelector:
         cloud.google.com/gke-spot: "true"
       containers:
-      - image: asia-southeast1-docker.pkg.dev/greennn/greennn/chillax-goodboi:placeholder
+      - image: asia-southeast1-docker.pkg.dev/blueee/blueee/pengy-bot:placeholder
         imagePullPolicy: IfNotPresent
         name: app
         ports:

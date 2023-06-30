@@ -1,10 +1,10 @@
 apiVersion: skaffold/v4beta2
 kind: Config
 metadata:
-  name: chillaxgoodboithebot
+  name: pengy-bot
 build:
   artifacts:
-  - image: asia-southeast1-docker.pkg.dev/greennn/greennn/chillax-goodboi
+  - image: asia-southeast1-docker.pkg.dev/blueee/blueee/pengy-bot
     docker:
       dockerfile: Dockerfile
 manifests:
