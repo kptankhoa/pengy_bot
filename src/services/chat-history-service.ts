@@ -6,7 +6,7 @@ import { collectionName } from 'const/firebase';
 import { ChatMessage } from 'models';
 import { convertFirebaseMessageToChatMessage, getChatHistoryKey } from 'utils';
 import { writeBatch } from '@firebase/firestore';
-import { FIRESTORE_MESSAGE_QUERY_LIMIT } from 'const/settings';
+import { MESSAGE_LIMIT } from 'const/settings';
 
 export const chatHistoryMap: Map<string, ChatMessage[]> = new Map();
 
@@ -18,7 +18,7 @@ export const getChatHistory = async (chatId: number, mode: string): Promise<Chat
   }
   console.info(`fetch history for ${historyId}`);
   const messageCollectionRef = collection(db, collectionName.chat_history, historyId, collectionName.message);
-  const q = query(messageCollectionRef, orderBy('updatedAt', 'desc'), limit(FIRESTORE_MESSAGE_QUERY_LIMIT));
+  const q = query(messageCollectionRef, orderBy('updatedAt', 'desc'), limit(MESSAGE_LIMIT));
   const docSnap = await getDocs(q);
   const newChatHistory: ChatMessage[] = [];
   docSnap.forEach((msg) => newChatHistory.push(convertFirebaseMessageToChatMessage(msg.data())));

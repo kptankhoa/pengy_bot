@@ -1,6 +1,13 @@
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
 import { v4 as uuidv4 } from 'uuid';
-import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage, RETRY_TIMES } from 'const/settings';
+import {
+  apiKey,
+  completeRequestConfig,
+  defaultMaxTokens,
+  defaultMessage,
+  MESSAGE_LIMIT,
+  RETRY_TIMES
+} from 'const/settings';
 import { getChatBot, getDictionary } from 'services';
 import { getMessagesByTokens, printWithoutWord } from 'utils';
 import { getExtraVocabularyPrompt, getTimePrompt } from 'const/prompts';
@@ -50,7 +57,8 @@ export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: strin
 
   const maxTokens = tokens || defaultMaxTokens;
   const systemGuide = buildSystemGuide(chatMode);
-  const messages = getMessagesByTokens(chatHistory, maxTokens, systemGuide, postfix);
+  const shortenHistory = [...chatHistory].splice(chatHistory.length - MESSAGE_LIMIT);
+  const messages = getMessagesByTokens(shortenHistory, maxTokens, systemGuide, postfix);
   console.log('------input------');
   messages.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
 
