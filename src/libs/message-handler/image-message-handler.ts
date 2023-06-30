@@ -8,7 +8,6 @@ export const onImageMessage = async (bot: any, msg: Message) => {
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
 
   const res: Message = await bot.sendMessage(chatId, 'Đang vẽ chờ xíu', { reply_to_message_id: msg.message_id });
-  setBotReplyIdMode(chatId, res.message_id, 'no_reply');
 
   bot.sendChatAction(chatId, 'typing');
 
@@ -25,6 +24,7 @@ export const onImageMessage = async (bot: any, msg: Message) => {
   }));
   const res1: Message = await bot.sendMediaGroup(chatId, medias, { reply_to_message_id: msg.message_id });
 
-  setBotReplyIdMode(chatId, res1.message_id, 'no_reply');
-  setLastInteractionMode(chatId, 'no_reply');
+  await setBotReplyIdMode(chatId, res.message_id, 'no_reply');
+  await setBotReplyIdMode(chatId, res1.message_id, 'no_reply');
+  await setLastInteractionMode(chatId, 'no_reply');
 };

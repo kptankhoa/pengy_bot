@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { apiKey, completeRequestConfig, defaultMaxTokens, defaultMessage, RETRY_TIMES } from 'const/settings';
 import { getChatBot, getDictionary } from 'services';
 import { getMessagesByTokens, printWithoutWord } from 'utils';
-import { getExtraVocabularyPrompt } from 'const/prompts';
+import { getExtraVocabularyPrompt, getTimePrompt } from 'const/prompts';
 import { ChatMessage } from 'models';
 import { extraVocabModes, useExtraVocab } from 'libs/firebase';
 
@@ -17,9 +17,9 @@ const buildSystemGuide = (mode: string): string => {
   if (useExtraVocab() && extraVocabModes().includes(mode)) {
     const dictWords = getDictionary();
     const vocabs = dictWords.reduce((prev, curr) => ({ ...prev, [curr.word]: printWithoutWord(curr)}), {});
-    guide = systemGuide.concat(getExtraVocabularyPrompt(vocabs));
+    guide = systemGuide.concat(getExtraVocabularyPrompt(vocabs), getTimePrompt());
   } else {
-    guide = systemGuide;
+    guide = systemGuide.concat(getTimePrompt());
   }
 
   return guide;

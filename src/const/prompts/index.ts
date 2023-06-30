@@ -7,3 +7,5 @@ export const getWeatherDetailPrompt = (text: string) => `Given the following JSO
 export const getWordUsagePrompt = (word: DictWord) => `Given the following JSON containing a word with its type, meaning and synonym: ${JSON.stringify(word)}. Using Vietnamese, introduce the word and give me an example of how to use it`;
 
 export const getExtraVocabularyPrompt = (obj: any) => `The following JSON will contain some words with theirs meanings to consolidate your vocabulary: ${JSON.stringify(obj)}.`;
+
+export const getTimePrompt = () => `The current timestamp is ${new Date().toISOString()} in case there are questions about time. Use GMT+7 timezone by default.`

@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.ts",
     "build": "rimraf ./build && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts,.tsx --fix"
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "deploy": "skaffold run"
   },
   "author": "kptankhoa",
   "license": "ISC",

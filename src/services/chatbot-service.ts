@@ -12,7 +12,8 @@ onSnapshot(chatBotRef, (querySnapshot) => {
   console.info('fetch chatbots');
   chatBotMap.clear();
   querySnapshot.forEach((doc) => {
-    chatBotMap.set(doc.id, { id: doc.id, ...doc.data()} as ChatBot);
+    const data = doc.data();
+    chatBotMap.set(doc.id, { id: doc.id, ...data, name: data.name || doc.id } as ChatBot);
   });
 });
 
