@@ -4,7 +4,8 @@ import {
   getChatBot,
   getChatBotRegEx,
   getChatHistory,
-  handleMessageRequest, setBotReplyIdMode,
+  handleMessageRequest,
+  setBotReplyIdMode,
   setLastInteractionMode
 } from 'services';
 
@@ -17,7 +18,7 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
   const chatContent = msg.text?.startsWith('/') ? msg.text.replace(getChatBotRegEx(mode), '').trim() : msg.text;
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
 
-  console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date()}`);
+  console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date().toISOString()}`);
   bot.sendChatAction(chatId, 'typing');
   const newUserMsg: ChatMessage = ({
     name: msg.from.username,

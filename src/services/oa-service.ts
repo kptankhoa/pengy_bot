@@ -11,7 +11,7 @@ import {
 import { getChatBot, getDictionary } from 'services';
 import { getMessagesByTokens, printWithoutWord } from 'utils';
 import { getExtraVocabularyPrompt, getTimePrompt } from 'const/prompts';
-import { ChatMessage } from 'models';
+import { ChatMessage, DictWord } from 'models';
 import { extraVocabModes, useExtraVocab } from 'libs/firebase';
 
 const configuration = new Configuration({ apiKey });
@@ -23,7 +23,7 @@ const buildSystemGuide = (mode: string): string => {
   let guide;
   if (useExtraVocab() && extraVocabModes().includes(mode)) {
     const dictWords = getDictionary();
-    const vocabs = dictWords.reduce((prev, curr) => ({ ...prev, [curr.word]: printWithoutWord(curr)}), {});
+    const vocabs = dictWords.reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr)}), {});
     guide = systemGuide.concat(getExtraVocabularyPrompt(vocabs), getTimePrompt());
   } else {
     guide = systemGuide.concat(getTimePrompt());

@@ -15,9 +15,9 @@ onSnapshot(dictRef, (querySnapshot) => {
   });
 });
 
-export const getDictionary = () => {
-  return Array.from(dictionaryMap.values());
-};
+export const getDictionary = () => Array
+  .from(dictionaryMap.values())
+  .sort((a, b) => a.word.localeCompare(b.word));
 
 export const findWord = (word: string): DictWord[] | null => {
   const foundKeys = Array.from(dictionaryMap.keys())

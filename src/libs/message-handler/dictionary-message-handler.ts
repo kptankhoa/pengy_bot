@@ -1,17 +1,18 @@
-import { dictCommandMapping, dictUsage } from 'const/firebase';
+import { commandMapping, dictUsage } from 'const/firebase';
 import { DictWord, Message } from 'models';
 import { createWord, findWord, getDictionary, removeWord } from 'services';
-import { printWords } from 'utils';
 import { BOT_COMMAND } from 'const/chat';
+import { printWords } from 'utils';
 
-const getDefaultMessage = () => 'No command recognized, use -help to show available commands.';
+const getDefaultMessage = () => 'No command recognized, use `/dict help` to show available commands.';
 
 const getHelp = () => {
   const description = 'Pengy dictionary: fuck your language';
-  const usageLine = 'USAGE: /dict [command] [options?]';
+  const usageLine = 'USAGE: `/dict [command] [options?]`';
   const commandListLine = 'Command list:';
   const usage = Object.entries(dictUsage)
-    .map(([key, usage]) => `${key}${usage.params ? `\t${usage.params}`: ''}:\t${usage.purpose}`)
+    .filter(([, usage]) => !!usage)
+    .map(([key, usage]) => `${key}${usage?.params ? `\t${usage.params}` : ''}:\t${usage?.purpose}`)
     .join('\n');
 
   return `${description}\n${usageLine}\n${commandListLine}\n${usage}`;
@@ -24,7 +25,7 @@ const getWords = () => {
 };
 
 const getWord = (text: string) => {
-  const search = text.replace(dictCommandMapping.find, '').trim();
+  const search = text.replace(commandMapping.get, '').trim();
   const words: DictWord[] | null = findWord(search);
 
   if (!words) {
@@ -34,8 +35,8 @@ const getWord = (text: string) => {
   return `Kết quả tìm kiếm cho ${search}:\n${printWords(words)}`;
 };
 
-const deleteWord = async (text: string)=> {
-  const search = text.replace(dictCommandMapping.delete, '').trim();
+const deleteWord = async (text: string) => {
+  const search = text.replace(commandMapping.delete, '').trim();
 
   await removeWord(search);
 
@@ -43,13 +44,13 @@ const deleteWord = async (text: string)=> {
 };
 
 const addWord = async (text: string) => {
-  const newWordStr = text.replace(dictCommandMapping.add, '').trim();
+  const newWordStr = text.replace(commandMapping.set, '').trim();
   const [word, type, meaning, synonym] = newWordStr.split(':');
 
   const newWord: DictWord = {
-    word: word.trim(),
-    type: type.trim(),
-    meaning: meaning.trim(),
+    word: word?.trim() || '',
+    type: type?.trim() || '',
+    meaning: meaning?.trim() || '',
     synonym: synonym ? [...synonym.split(',').map((s => s.trim()))] : undefined
   } as DictWord;
 
@@ -63,23 +64,23 @@ const addWord = async (text: string) => {
 };
 
 const getReplyMessage = async (text: string): Promise<string> => {
-  if (!text || dictCommandMapping.all.test(text)) {
+  if (!text || commandMapping.all.test(text)) {
     return getWords();
   }
 
-  if (dictCommandMapping.help.test(text)) {
+  if (commandMapping.help.test(text)) {
     return getHelp();
   }
 
-  if (dictCommandMapping.find.test(text)) {
+  if (commandMapping.get.test(text)) {
     return getWord(text);
   }
 
-  if (dictCommandMapping.add.test(text)) {
+  if (commandMapping.set.test(text)) {
     return addWord(text);
   }
 
-  if (dictCommandMapping.delete.test(text)) {
+  if (commandMapping.delete.test(text)) {
     return deleteWord(text);
   }
 

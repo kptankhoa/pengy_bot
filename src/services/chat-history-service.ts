@@ -14,7 +14,6 @@ export const getChatHistory = async (chatId: number, mode: string): Promise<Chat
   const historyId = getChatHistoryKey(chatId, mode);
   const chatHistory = chatHistoryMap.get(historyId);
   if (chatHistory) {
-    console.log(chatHistory.length)
     return chatHistory;
   }
   console.info(`fetch history for ${historyId}`);

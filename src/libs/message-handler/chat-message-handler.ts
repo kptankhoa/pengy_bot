@@ -1,4 +1,4 @@
-import { Message } from 'models';
+import { ChatMode, Message } from 'models';
 import { chatModes, getBotReplyIdMode, getLastInteractionMode } from 'services';
 import { handleChatMessage } from 'libs/message-handler/handle-text-message';
 
@@ -7,7 +7,7 @@ export const onIncomingMessage = async (bot: any, msg: Message) => {
   const chatText = msg.text;
   const replyMessageId = msg.reply_to_message?.message_id;
 
-  const chatMode = chatModes().find((mode) => mode.command.test(chatText));
+  const chatMode = chatModes().find((mode: ChatMode) => mode.command.test(chatText));
   if (chatMode) {
     return handleChatMessage(bot, msg, chatMode.mode);
   }

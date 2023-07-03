@@ -32,6 +32,10 @@ export const setUpBot = () => {
       return messageHandler.onDictionary(msg);
     }
 
+    if (BOT_COMMAND.FUND.test(chatText)) {
+      return messageHandler.onFund(msg);
+    }
+
     return messageHandler.onNewMessage(msg);
 
   };

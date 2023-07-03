@@ -1,3 +1,5 @@
 export * from './collection-name';
-export * from './dict-command';
+export * from './command';
 export * from './remote-config';
+export * from './dictionary';
+export * from './fund';

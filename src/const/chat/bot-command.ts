@@ -4,4 +4,5 @@ export const BOT_COMMAND = {
   WEATHER: new RegExp('^/b +'),
   NEWS: new RegExp('^/n +'),
   DICT: new RegExp('^/dict'),
+  FUND: new RegExp('^/fund'),
 };

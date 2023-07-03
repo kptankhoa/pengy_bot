@@ -11,7 +11,7 @@ export const onImageMessage = async (bot: any, msg: Message) => {
 
   bot.sendChatAction(chatId, 'typing');
 
-  console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date()}`);
+  console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date().toISOString()}`);
   console.log(`prompt: ${prompt}`);
   const imageUrls = await handleImageRequest(prompt);
   if (!imageUrls || !imageUrls.length) {
