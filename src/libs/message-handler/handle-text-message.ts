@@ -8,6 +8,7 @@ import {
   setBotReplyIdMode,
   setLastInteractionMode
 } from 'services';
+import { pepeStickerMap } from 'const/chat';
 
 export const handleChatMessage = async (bot: any, msg: Message, mode: string) => {
   const chatId = msg.chat.id;
@@ -30,7 +31,9 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
 
   console.log('------output------');
   console.log(`${chatBot.name}: ${replyContent}`);
-  const res: Message = await bot.sendMessage(chatId, replyContent, { reply_to_message_id: msg.message_id });
+  const options = { reply_to_message_id: msg.message_id };
+  const stickerFileId = pepeStickerMap.get(replyContent);
+  const res: Message = stickerFileId ? await bot.sendSticker(chatId, stickerFileId, options) : await bot.sendMessage(chatId, replyContent, options);
   const repliedTime = Date.now();
 
   const newBotMessage: ChatMessage = {

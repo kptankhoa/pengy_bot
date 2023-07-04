@@ -2,10 +2,7 @@ import { db } from 'libs/firebase';
 import { collectionName } from 'const/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getBotReplyIdKey } from 'utils';
-
-export const botReplyIdMap: Map<string, string> = new Map();
-
-export const lastInteractionModeMap: Map<string, string> = new Map();
+import { botReplyIdMap, lastInteractionModeMap } from 'const/chat';
 
 export const getLastInteractionMode = async (chatId: number): Promise<string | null> => {
   const key = chatId.toString();

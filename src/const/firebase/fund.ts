@@ -17,7 +17,7 @@ export const fundUsage: {[key in Command]: {
   },
   [Command.log]: {
     params: '[name]',
-    purpose: 'get funds logs by name'
+    purpose: 'get fund log by name'
   },
   [Command.help]: {
     purpose: 'show help'

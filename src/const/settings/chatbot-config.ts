@@ -4,6 +4,8 @@ export const defaultBotName = process.env.BOT_NAME || '';
 
 export const telegramToken = process.env.BOT_TOKEN || '';
 
+export const telegramTokenDev = process.env.BOT_TOKEN_DEV || '';
+
 export const apiKey = process.env.OPENAI_API_KEY || '';
 
 export const bingImageCookie = process.env.BING_IMAGE_COOKIE || '';

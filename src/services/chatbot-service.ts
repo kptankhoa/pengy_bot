@@ -2,11 +2,9 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from 'libs/firebase';
 import { collectionName } from 'const/firebase';
 import { ChatBot, ChatMode } from 'models';
-import { defaultBot } from 'const/chat';
+import { chatBotMap, defaultBot } from 'const/chat';
 
 const chatBotRef = collection(db, collectionName.chat_bot);
-
-const chatBotMap = new Map<string, ChatBot>();
 
 onSnapshot(chatBotRef, (querySnapshot) => {
   console.info('fetch chatbots');
