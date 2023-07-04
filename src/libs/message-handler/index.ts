@@ -6,7 +6,7 @@ import { onNewsMessage } from './news-message-handler';
 import { onWeatherMessage } from './weather-message-handler';
 import { onDictionaryMessage } from './dictionary-message-handler';
 import { onFundMessage } from './fund-message-handler';
-import { onNoteMessage } from "./note-message-handler";
+import { onNoteMessage } from './note-message-handler';
 
 export const getMessageHandler = (bot: any) => ({
   onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),

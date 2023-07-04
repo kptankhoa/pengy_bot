@@ -23,7 +23,7 @@ const buildSystemGuide = (mode: string): string => {
   let guide;
   if (useExtraVocab() && extraVocabModes().includes(mode)) {
     const dictWords = getDictionary();
-    const vocabs = dictWords.reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr)}), {});
+    const vocabs = dictWords.reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr) }), {});
     guide = systemGuide.concat(getExtraVocabularyPrompt(vocabs), getTimePrompt());
   } else {
     guide = systemGuide.concat(getTimePrompt());

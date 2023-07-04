@@ -1,5 +1,5 @@
 import { DictWord } from 'models/dict-word';
-import { Note } from "models";
+import { Note } from 'models';
 
 export const getWeatherLocationPrompt = (text: string) => `You're an geographist and you help user to find locations mentioned in text and only give the location name. for example, when I ask "hôm nay thời tiết Nha Trang có phù hợp để chạy bộ không?", you will answer "Nha Trang". first, please help me with this text: ${text}. give me the location name only`;
 

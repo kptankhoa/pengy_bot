@@ -29,6 +29,11 @@ rules:
   eol-last:
     - error
     - always
+  no-extra-semi:
+    - error
+  object-curly-spacing:
+    - error
+    - always
   '@typescript-eslint/no-explicit-any':
      - off
   '@typescript-eslint/no-var-requires':
