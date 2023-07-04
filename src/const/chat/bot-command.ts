@@ -5,4 +5,5 @@ export const BOT_COMMAND = {
   NEWS: new RegExp('^/n +'),
   DICT: new RegExp('^/dict'),
   FUND: new RegExp('^/fund'),
+  NOTE: new RegExp('^/note'),
 };

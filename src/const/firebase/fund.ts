@@ -23,5 +23,6 @@ export const fundUsage: {[key in Command]: {
     purpose: 'show help'
   },
   [Command.set]: null,
+  [Command.add]: null,
   [Command.delete]: null
 };

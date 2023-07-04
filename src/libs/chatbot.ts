@@ -42,6 +42,10 @@ export const setUpBot = (mode: 'dev' | 'prod') => {
       return messageHandler.onFund(msg);
     }
 
+    if (BOT_COMMAND.NOTE.test(chatText)) {
+      return messageHandler.onNote(msg);
+    }
+
     return messageHandler.onNewMessage(msg);
 
   };

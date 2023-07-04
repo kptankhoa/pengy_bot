@@ -1,10 +1,11 @@
 export enum Command {
+    add = 'add',
     all = 'all',
-    set = 'set',
-    get = 'get',
     delete = 'delete',
-    log = 'log',
+    get = 'get',
     help = 'help',
+    log = 'log',
+    set = 'set',
     update = 'update'
 }
 
@@ -14,6 +15,7 @@ export const getCommandRegEx = (command: Command) => {
 
 export const commandMapping = {
   all: getCommandRegEx(Command.all),
+  add: getCommandRegEx(Command.add),
   set: getCommandRegEx(Command.set),
   get: getCommandRegEx(Command.get),
   delete: getCommandRegEx(Command.delete),

@@ -23,5 +23,6 @@ export const dictUsage: {[key in Command]: {
     purpose: 'show help'
   },
   [Command.log]: null,
+  [Command.add]: null,
   [Command.update]: null
 };

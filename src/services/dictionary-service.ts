@@ -2,10 +2,9 @@ import { collection, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firesto
 import { db } from 'libs/firebase';
 import { collectionName } from 'const/firebase';
 import { DictWord } from 'models';
+import { dictionaryMap } from "const/chat";
 
 const dictRef = collection(db, collectionName.dictionary);
-
-const dictionaryMap = new Map<string, DictWord>();
 
 onSnapshot(dictRef, (querySnapshot) => {
   console.info('fetch dictionary');
