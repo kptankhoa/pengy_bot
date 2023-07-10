@@ -1,20 +1,45 @@
-import { doc, onSnapshot } from 'firebase/firestore';
-import { collectionName, FirebaseRemoteConfig, remoteConfigKey } from 'const/firebase';
+import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { collectionName, FirebaseRemoteConfig } from 'const/firebase';
 import { db } from './firebase';
 
-const configDocKey = 'config';
+const configCollectionRef = collection(db, collectionName.other_config);
 
-const configDocRef = doc(db, collectionName.other_config, configDocKey);
+const configMap = new Map<string, FirebaseRemoteConfig>();
 
-const configMap = new Map<remoteConfigKey, any>();
+const defaultConfig: FirebaseRemoteConfig = {
+  extraVocabModes: ['pengy', 'story', 'content'],
+  useExtraVocab: true
+};
 
-onSnapshot(configDocRef, (config) => {
-  console.info('fetch config');
+onSnapshot(configCollectionRef, (snapshot) => {
+  console.info('fetch configs');
   configMap.clear();
-  Object.entries(config.data() as FirebaseRemoteConfig)
-    .map(([key, value]) => configMap.set(key as remoteConfigKey, value));
+  snapshot.forEach((doc) => {
+    configMap.set(doc.id, doc.data() as FirebaseRemoteConfig);
+  });
+  console.log(configMap);
 });
 
-export const extraVocabModes = (): string[] => configMap.get('extraVocabModes') || [];
+const setDefaultConfig = async (chatId: number) => {
+  configMap.set(chatId.toString(), defaultConfig);
+  const docRef = doc(db, collectionName.other_config, chatId.toString());
+  await setDoc(docRef, defaultConfig);
+};
 
-export const useExtraVocab = (): boolean => configMap.get('useExtraVocab') || false;
+export const extraVocabModes = (chatId: number): string[] => {
+  const existedConfig = configMap.get(chatId.toString());
+  if (existedConfig) {
+    return existedConfig.extraVocabModes;
+  }
+  setDefaultConfig(chatId);
+  return defaultConfig.extraVocabModes;
+};
+
+export const useExtraVocab = (chatId: number): boolean => {
+  const existedConfig = configMap.get(chatId.toString());
+  if (existedConfig) {
+    return existedConfig.useExtraVocab;
+  }
+  setDefaultConfig(chatId);
+  return defaultConfig.useExtraVocab;
+};

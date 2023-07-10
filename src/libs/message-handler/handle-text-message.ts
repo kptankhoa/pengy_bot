@@ -1,14 +1,19 @@
-import { ChatMessage, Message, MessageType, RoleEnum } from 'models';
+import { ChatMessage, DictWord, Message, MessageType, RoleEnum } from 'models';
 import {
   addNewMessage,
   getChatBot,
   getChatBotRegEx,
   getChatHistory,
+  getDictionary,
   handleMessageRequest,
   setBotReplyIdMode,
   setLastInteractionMode
 } from 'services';
 import { pepeStickerMap } from 'const/chat';
+import moment from 'moment';
+import { extraVocabModes, useExtraVocab } from 'libs/firebase';
+import { printWithoutWord } from 'utils';
+import { getExtraVocabularyPrompt, getTimePrompt } from 'const/prompts';
 
 export const handleChatMessage = async (bot: any, msg: Message, mode: string) => {
   const chatId = msg.chat.id;
@@ -19,15 +24,26 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
   const chatContent = msg.text?.startsWith('/') ? msg.text.replace(getChatBotRegEx(mode), '').trim() : msg.text;
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
 
-  console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, mode: ${mode}, time: ${new Date().toISOString()}`);
+  console.log(`\n\n--------from: ${isPrivate ? msg.chat.username : msg.chat.title}, chat_id: ${chatId}, message_id: ${msg.message_id}, mode: ${mode}, time: ${moment(Date.now()).utcOffset('+0700').format('DD/MM/yyyy HH:mm')}`);
   bot.sendChatAction(chatId, 'typing');
   const newUserMsg: ChatMessage = ({
     name: msg.from.username,
     content: chatContent,
     role: RoleEnum.USER
   });
+  const getExtraPrompt = async (): Promise<string> => {
+    if (useExtraVocab(chatId) && (extraVocabModes(chatId)).includes(mode)) {
+      const dictionary = await getDictionary(chatId);
+      const vocabs = Array
+        .from(dictionary.values())
+        .reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr) }), {});
+      return getExtraVocabularyPrompt(vocabs).concat(getTimePrompt());
+    }
 
-  const replyContent = await handleMessageRequest([...chatHistory, newUserMsg], mode);
+    return getTimePrompt();
+  };
+
+  const replyContent = await handleMessageRequest([...chatHistory, newUserMsg], mode, await getExtraPrompt());
 
   console.log('------output------');
   console.log(`${chatBot.name}: ${replyContent}`);

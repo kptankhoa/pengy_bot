@@ -1,4 +1,4 @@
-import { STICKER_SET, telegramToken, telegramTokenDev } from 'const/settings';
+import { mode, STICKER_SET, telegramToken } from 'const/settings';
 import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
 import { BOT_COMMAND, pepeStickerMap } from 'const/chat';
@@ -6,13 +6,9 @@ import { Sticker } from 'models/sticker';
 
 const TelegramBot = require('node-telegram-bot-api');
 
-export const setUpBot = (mode: 'dev' | 'prod') => {
-  const tokenMap = {
-    dev: telegramTokenDev,
-    prod: telegramToken
-  };
+export const setUpBot = () => {
 
-  const bot = new TelegramBot(tokenMap[mode], { polling: true });
+  const bot = new TelegramBot(telegramToken, { polling: true });
 
   const onTextMsg = (msg: Message) => {
     const messageHandler = getMessageHandler(bot);
@@ -65,7 +61,7 @@ export const setUpBot = (mode: 'dev' | 'prod') => {
     stickers.forEach((sticker: Sticker) => pepeStickerMap.set(sticker.emoji, sticker.file_id));
   });
 
-  if (mode === 'prod') {
+  if (mode === 'dev') {
     bot.sendMessage('-1001963630601', 'Mới reset bot');
   }
 

@@ -1,10 +1,8 @@
-require('dotenv').config();
+require('dotenv').config({ path: `./env/.env.${process.env.NODE_ENV}` });
 
 export const defaultBotName = process.env.BOT_NAME || '';
 
 export const telegramToken = process.env.BOT_TOKEN || '';
-
-export const telegramTokenDev = process.env.BOT_TOKEN_DEV || '';
 
 export const apiKey = process.env.OPENAI_API_KEY || '';
 
@@ -23,3 +21,5 @@ export const completeRequestConfig = {
   presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY || 0),
   frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY || 0)
 };
+
+export const mode = process.env.ENV_NODE || '';

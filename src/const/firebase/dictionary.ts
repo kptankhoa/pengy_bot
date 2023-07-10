@@ -11,6 +11,10 @@ export const dictUsage: {[key in Command]: {
     params: '[word]:[type]:[meaning]:[synonym]',
     purpose: 'set a word'
   },
+  [Command.update]: {
+    params: '[word]:[type]:[meaning]:[synonym]',
+    purpose: 'set a word'
+  },
   [Command.get]: {
     params: '[word]',
     purpose: 'get words by name'
@@ -24,5 +28,4 @@ export const dictUsage: {[key in Command]: {
   },
   [Command.log]: null,
   [Command.add]: null,
-  [Command.update]: null
 };

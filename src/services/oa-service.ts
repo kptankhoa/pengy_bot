@@ -8,29 +8,13 @@ import {
   MESSAGE_LIMIT,
   RETRY_TIMES
 } from 'const/settings';
-import { getChatBot, getDictionary } from 'services';
-import { getMessagesByTokens, printWithoutWord } from 'utils';
-import { getExtraVocabularyPrompt, getTimePrompt } from 'const/prompts';
-import { ChatMessage, DictWord } from 'models';
-import { extraVocabModes, useExtraVocab } from 'libs/firebase';
+import { getChatBot } from 'services';
+import { getMessagesByTokens } from 'utils';
+import { ChatMessage } from 'models';
 
 const configuration = new Configuration({ apiKey });
 
 const openai = new OpenAIApi(configuration);
-
-const buildSystemGuide = (mode: string): string => {
-  const { systemGuide } = getChatBot(mode);
-  let guide;
-  if (useExtraVocab() && extraVocabModes().includes(mode)) {
-    const dictWords = getDictionary();
-    const vocabs = dictWords.reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr) }), {});
-    guide = systemGuide.concat(getExtraVocabularyPrompt(vocabs), getTimePrompt());
-  } else {
-    guide = systemGuide.concat(getTimePrompt());
-  }
-
-  return guide;
-};
 
 const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<string> => {
   let retries = 0;
@@ -52,15 +36,15 @@ const getReplyMessage = async (request: CreateChatCompletionRequest): Promise<st
   return defaultMessage;
 };
 
-export const handleMessageRequest = (chatHistory: ChatMessage[], chatMode: string) => {
-  const { postfix, tokens } = getChatBot(chatMode);
-
+export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode: string, extraPrompt = '') => {
+  const { postfix, systemGuide, tokens } = getChatBot(chatMode);
   const maxTokens = tokens || defaultMaxTokens;
-  const systemGuide = buildSystemGuide(chatMode);
+  const guide = systemGuide.concat(extraPrompt);
   const shortenHistory = [...chatHistory].splice(chatHistory.length - MESSAGE_LIMIT);
-  const messages = getMessagesByTokens(shortenHistory, maxTokens, systemGuide, postfix);
+  const messages = getMessagesByTokens(shortenHistory, maxTokens, guide, postfix);
   console.log('------input------');
-  messages.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
+  // messages.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
+  [messages[0], messages[messages.length - 1]].map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
 
   const completionRequest = {
     messages,

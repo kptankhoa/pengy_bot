@@ -5,3 +5,5 @@ export interface DictWord {
     type?: string;
     synonym?: string[];
 }
+
+export type Dictionary = Map<string, DictWord>;

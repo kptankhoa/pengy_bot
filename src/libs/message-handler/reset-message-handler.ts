@@ -23,7 +23,7 @@ export const onResetMessage = async (bot: any, msg: Message) => {
   await Promise.all(promises);
   const resetModes = exist.join(', ');
 
-  console.info(`\n\n--------reset: message_id: ${msg.message_id}, mode: ${resetModes}`);
+  console.info(`\n\n--------reset: chat_id: ${chatId}, message_id: ${msg.message_id}, mode: ${resetModes}`);
   const res: Message = await bot.sendMessage(chatId, `Cleared chat history in: ${resetModes}\nNot available: ${notExist.join(', ')}`, { reply_to_message_id: msg.message_id });
 
   setBotReplyIdMode(chatId, res.message_id, 'no_reply');
