@@ -2,8 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: pengy-bot
-  name: pengy-bot-deployment
+    app: pengy-bot-prod
+  name: pengy-bot-prod-deployment
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -11,7 +11,7 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: pengy-bot
+      app: pengy-bot-prod
   strategy:
     rollingUpdate:
       maxSurge: 0%
@@ -20,12 +20,12 @@ spec:
   template:
     metadata:
       labels:
-        app: pengy-bot
+        app: pengy-bot-prod
     spec:
       nodeSelector:
         cloud.google.com/gke-spot: "true"
       containers:
-      - image: asia-southeast1-docker.pkg.dev/blueee/blueee/pengy-bot:placeholder
+      - image: asia-southeast1-docker.pkg.dev/blueee/blueee/pengy-bot-prod:placeholder
         imagePullPolicy: IfNotPresent
         name: app
         ports:
