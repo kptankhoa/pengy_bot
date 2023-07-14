@@ -1,6 +1,7 @@
 export const collectionName = {
   dictionary: 'dictionary',
   chat_bot: 'chat_bots',
+  chat_config: 'chat_configs',
   other_config: 'other_configs',
   chat_history: 'chat_histories',
   bot_reply_id_mode: 'bot_reply_id_mode',
@@ -9,6 +10,5 @@ export const collectionName = {
   fund_by_chat: 'fund_by_chats',
   fund: 'funds',
   fund_log: 'logs',
-  note: 'notes',
-  chat_id: 'chat_ids'
+  note: 'notes'
 };

@@ -2,7 +2,7 @@ import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { collectionName, FirebaseRemoteConfig } from 'const/firebase';
 import { db } from './firebase';
 
-const configCollectionRef = collection(db, collectionName.other_config);
+const configCollectionRef = collection(db, collectionName.chat_config);
 
 const configMap = new Map<string, FirebaseRemoteConfig>();
 
@@ -12,7 +12,7 @@ const defaultConfig: FirebaseRemoteConfig = {
 };
 
 onSnapshot(configCollectionRef, (snapshot) => {
-  console.info('fetch configs');
+  console.info('fetch chat configs');
   configMap.clear();
   snapshot.forEach((doc) => {
     configMap.set(doc.id, doc.data() as FirebaseRemoteConfig);
@@ -21,7 +21,7 @@ onSnapshot(configCollectionRef, (snapshot) => {
 
 const setDefaultConfig = async (chatId: number) => {
   configMap.set(chatId.toString(), defaultConfig);
-  const docRef = doc(db, collectionName.other_config, chatId.toString());
+  const docRef = doc(db, collectionName.chat_config, chatId.toString());
   await setDoc(docRef, defaultConfig);
 };
 

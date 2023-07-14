@@ -1,3 +1,4 @@
 export * from './chat-id';
 export * from './firebase';
-export * from './remote-config';
+export * from './chat-config';
+export * from './other-config';

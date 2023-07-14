@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import querystring from 'querystring';
 import { performance } from 'perf_hooks';
-import { bingImageCookie } from 'const/settings';
+import { getBingImageToken } from 'libs/firebase';
 
 const BING_URL = 'https://www.bing.com';
 
@@ -102,7 +102,7 @@ const getImages = async (session: AxiosInstance, prompt: string) => {
 };
 
 export const generateImagesLinks = async (prompt: string) => {
-  const authCookie = bingImageCookie;
+  const authCookie = getBingImageToken();
 
   if (!authCookie || !prompt) {
     throw new Error('Missing parameters');

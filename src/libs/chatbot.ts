@@ -1,7 +1,7 @@
 import { STICKER_SET, telegramToken } from 'const/settings';
 import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
-import { BOT_COMMAND, KHOA_CHAT_ID, pepeStickerMap } from 'const/chat';
+import { BOT_COMMAND, NOTI_GROUP_ID, pepeStickerMap } from 'const/chat';
 import { Sticker } from 'models/sticker';
 import { checkChatIdExist } from 'libs/firebase';
 
@@ -16,7 +16,7 @@ export const setUpBot = () => {
     if (!await checkChatIdExist(chatId)) {
       const newMsgNoti = 'Mới có chat mới';
       const json = JSON.stringify(msg, null, 2);
-      await bot.sendMessage(KHOA_CHAT_ID, `${newMsgNoti}\n${json}`, {
+      await bot.sendMessage(NOTI_GROUP_ID, `${newMsgNoti}\n${json}`, {
         entities: [{ offset: newMsgNoti.length + 1, length: json.length, type: 'code' } ]
       });
     }
@@ -73,7 +73,7 @@ export const setUpBot = () => {
     stickers.forEach((sticker: Sticker) => pepeStickerMap.set(sticker.emoji, sticker.file_id));
   });
 
-  bot.sendMessage(KHOA_CHAT_ID, 'Mới reset bot');
+  bot.sendMessage(NOTI_GROUP_ID, 'Mới reset bot');
 
   console.info('---bot is running---');
 };

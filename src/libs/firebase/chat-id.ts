@@ -2,7 +2,9 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from 'libs/firebase/firebase';
 import { collectionName } from 'const/firebase';
 
-const chatIdListDocRef = doc(db, collectionName.chat_id, 'chat_id_list');
+const chatIdDocKey = 'chat_id_list';
+
+const chatIdListDocRef = doc(db, collectionName.other_config, chatIdDocKey);
 
 const chatIdMap = new Map<number, boolean>();
 
