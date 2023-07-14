@@ -7,6 +7,6 @@ export enum RoleEnum {
 export interface ChatMessage {
     role: RoleEnum,
     content: string;
-    name?: string;
+    name: string;
     updatedAt?: number;
 }

@@ -5,4 +5,5 @@ export const defaultBot: ChatBot = {
   systemGuide: '',
   postfix: '',
   key: '',
+  name: ''
 };

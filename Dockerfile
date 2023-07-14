@@ -1,6 +1,7 @@
 FROM node:16-alpine
 
 ARG START=start
+ENV START_CMD=${START}
 
 WORKDIR /usr/src/app
 
@@ -12,4 +13,5 @@ RUN npm install
 COPY . .
 
 EXPOSE 8080
-CMD [ "npm", ${START} ]
+
+CMD npm run ${START_CMD}

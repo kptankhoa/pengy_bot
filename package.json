@@ -10,8 +10,8 @@
     "build": "rimraf ./build && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts,.tsx --fix",
-    "deploy": "skaffold run",
-    "deploy:prod": "skaffold run"
+    "deploy:dev": "skaffold run -p dev",
+    "deploy:prod": "skaffold run -p prod"
   },
   "author": "kptankhoa",
   "license": "ISC",

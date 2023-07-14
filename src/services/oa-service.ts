@@ -9,7 +9,7 @@ import {
   RETRY_TIMES
 } from 'const/settings';
 import { getChatBot } from 'services';
-import { getMessagesByTokens } from 'utils';
+import { getMessagesByTokens, getName } from 'utils';
 import { ChatMessage } from 'models';
 
 const configuration = new Configuration({ apiKey });
@@ -40,7 +40,9 @@ export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode:
   const { postfix, systemGuide, tokens } = getChatBot(chatMode);
   const maxTokens = tokens || defaultMaxTokens;
   const guide = systemGuide.concat(extraPrompt);
-  const shortenHistory = [...chatHistory].splice(chatHistory.length - MESSAGE_LIMIT);
+  const shortenHistory = [...chatHistory]
+    .splice(chatHistory.length - MESSAGE_LIMIT)
+    .map((msg: ChatMessage) => ({ ...msg, name: getName(msg.name || '') }));
   const messages = getMessagesByTokens(shortenHistory, maxTokens, guide, postfix);
   console.log('------input------');
   // messages.map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));

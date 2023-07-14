@@ -9,5 +9,6 @@ export const collectionName = {
   fund_by_chat: 'fund_by_chats',
   fund: 'funds',
   fund_log: 'logs',
-  note: 'notes'
+  note: 'notes',
+  chat_id: 'chat_ids'
 };

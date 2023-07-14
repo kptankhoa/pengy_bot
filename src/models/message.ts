@@ -6,6 +6,7 @@ export enum MessageType {
 export interface Message {
     message_id: number,
     from: {
+        first_name: string;
         username: string,
     },
     chat: {

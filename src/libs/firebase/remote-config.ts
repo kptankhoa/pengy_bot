@@ -17,7 +17,6 @@ onSnapshot(configCollectionRef, (snapshot) => {
   snapshot.forEach((doc) => {
     configMap.set(doc.id, doc.data() as FirebaseRemoteConfig);
   });
-  console.log(configMap);
 });
 
 const setDefaultConfig = async (chatId: number) => {

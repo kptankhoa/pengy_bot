@@ -9,7 +9,8 @@ export const getWeatherLocation = async (msg: string)=> {
   const chatHistory: ChatMessage[] = [
     {
       content: getWeatherLocationPrompt(msg),
-      role: RoleEnum.USER
+      role: RoleEnum.USER,
+      name: 'user'
     }
   ];
   return await handleMessageRequest(chatHistory, 'empty');
