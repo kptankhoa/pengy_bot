@@ -4,7 +4,7 @@
   "description": "chillax goodboi bot vui ve",
   "main": "src/index.ts",
   "scripts": {
-    "start": "npm run build && NODE_ENV=dev node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
+    "start": "npm run build && node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
     "start:prod": "npm run build && NODE_ENV=prod node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
     "dev": "nodemon",
     "build": "rimraf ./build && tsc",

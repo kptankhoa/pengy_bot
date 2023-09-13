@@ -1,4 +1,4 @@
-require('dotenv').config({ path: `./env/.env.${process.env.NODE_ENV}` });
+require('dotenv').config();
 
 export const defaultBotName = process.env.BOT_NAME || '';
 
