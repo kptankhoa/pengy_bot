@@ -5,13 +5,10 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "npm run build && node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
-    "start:prod": "npm run build && NODE_ENV=prod node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
     "dev": "nodemon",
     "build": "rimraf ./build && tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts,.tsx --fix",
-    "deploy:dev": "skaffold run -p dev",
-    "deploy:prod": "skaffold run -p prod"
+    "lint": "eslint . --ext .ts,.tsx --fix"
   },
   "author": "kptankhoa",
   "license": "ISC",

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: process.env.NODE_ENV ? `./env/.env.${process.env.NODE_ENV}` : './.env' });
 
 export const defaultBotName = process.env.BOT_NAME || '';
 
@@ -19,5 +19,3 @@ export const completeRequestConfig = {
   presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY || 0),
   frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY || 0)
 };
-
-export const mode = process.env.ENV_NODE || '';
