@@ -2,6 +2,8 @@ require('dotenv').config();
 
 export const defaultBotName = process.env.BOT_NAME || '';
 
+export const PORT = Number(process.env.PORT || 6969);
+
 export const telegramToken = process.env.BOT_TOKEN || '';
 console.log({ token: telegramToken });
 export const apiKey = process.env.OPENAI_API_KEY || '';
