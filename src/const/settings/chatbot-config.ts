@@ -3,7 +3,7 @@ require('dotenv').config({ path: process.env.NODE_ENV ? `./env/.env.${process.en
 export const defaultBotName = process.env.BOT_NAME || '';
 
 export const telegramToken = process.env.BOT_TOKEN || '';
-
+console.log(telegramToken);
 export const apiKey = process.env.OPENAI_API_KEY || '';
 
 export const defaultMessage = process.env.OPENAI_DEFAULT_RESPONSE || '';
