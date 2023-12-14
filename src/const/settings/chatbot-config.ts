@@ -1,11 +1,11 @@
-require('dotenv').config();
+require('dotenv').config({ path: process.env.NODE_ENV ? `./env/.env.${process.env.NODE_ENV}` : './.env' });
 
 export const defaultBotName = process.env.BOT_NAME || '';
 
 export const PORT = Number(process.env.PORT || 6969);
 
 export const telegramToken = process.env.BOT_TOKEN || '';
-console.log({ token: telegramToken });
+
 export const apiKey = process.env.OPENAI_API_KEY || '';
 
 export const defaultMessage = process.env.OPENAI_DEFAULT_RESPONSE || '';
