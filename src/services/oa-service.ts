@@ -13,13 +13,19 @@ import { ChatMessage } from 'models';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Workers cancel waitUntil work 30s after the response, so the LLM step must finish well inside that.
+const ATTEMPT_TIMEOUT_MS = 18_000;
+const LLM_BUDGET_MS = 22_000;
+
 class NonRetryableError extends Error {}
 
 const getReplyMessage = async (request: object, estimatedTokens: number): Promise<string> => {
   let retries = 0;
+  const started = Date.now();
   while (retries < RETRY_TIMES) {
     try {
       const res = await fetch(`${baseUrl}/chat/completions`, {
+        signal: AbortSignal.timeout(Math.min(ATTEMPT_TIMEOUT_MS, LLM_BUDGET_MS - (Date.now() - started))),
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
         body: JSON.stringify(request)
@@ -31,7 +37,7 @@ const getReplyMessage = async (request: object, estimatedTokens: number): Promis
       }
       const completion = await res.json<{ choices: { message?: { content?: string } }[], usage?: { prompt_tokens: number } }>();
       // compare with getUsedTokens' chars/3 guess to tune it
-      console.log(`prompt tokens: estimated ${estimatedTokens}, actual ${completion.usage?.prompt_tokens}`);
+      console.log(`llm ${Date.now() - started}ms, prompt tokens: estimated ${estimatedTokens}, actual ${completion.usage?.prompt_tokens}`);
       return completion.choices[0].message?.content || defaultMessage;
     } catch (error: any) {
       console.error('-----error, retries time: ' + retries);
@@ -40,6 +46,9 @@ const getReplyMessage = async (request: object, estimatedTokens: number): Promis
         break;
       }
       retries++;
+      if (Date.now() - started + 500 * 2 ** retries >= LLM_BUDGET_MS) {
+        break;
+      }
       await sleep(500 * 2 ** retries);
     }
   }

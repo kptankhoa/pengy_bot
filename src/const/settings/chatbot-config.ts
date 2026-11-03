@@ -17,6 +17,8 @@ export const completeRequestConfig = {
   top_p: Number(process.env.OPENAI_TOP_P || 0),
   n: 1,
   stream: false,
+  // Gemini: 'none' (2.5 models) or 'low' cuts thinking time
+  ...process.env.OPENAI_REASONING_EFFORT && { reasoning_effort: process.env.OPENAI_REASONING_EFFORT },
   ...Number(process.env.OPENAI_PRESENCE_PENALTY) && { presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY) },
   ...Number(process.env.OPENAI_FREQUENCY_PENALTY) && { frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY) }
 };

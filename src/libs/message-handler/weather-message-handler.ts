@@ -12,7 +12,7 @@ export const onWeatherMessage = async (bot: any, msg: Message) => {
   const location = await getWeatherLocation(chatText);
   const weatherPrompt = getWeatherDetailPrompt(chatText);
 
-  const weatherObject = await getWeatherRequest(location.substring(0, location.length - 1));
+  const weatherObject = await getWeatherRequest(location.trim());
   if (!weatherObject) {
     return bot.sendMessage(chatId, defaultMessage, {
       reply_to_message_id: msg.message_id,
