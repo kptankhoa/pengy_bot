@@ -1,14 +1,9 @@
 import { ChatMessage, RoleEnum } from 'models';
-import { GPTTokens, supportModelType } from 'gpt-tokens';
-import { completeRequestConfig, MODEL_LIMIT_TOKENS } from 'const/settings';
+import { MODEL_LIMIT_TOKENS } from 'const/settings';
 
-const getUsedTokens = (messages: ChatMessage[], maxTokens: number): number => {
-  const gptTokens = new GPTTokens({
-    messages,
-    model: completeRequestConfig.model as supportModelType
-  });
-  return gptTokens.usedTokens + maxTokens;
-};
+// shortcut: ~3 chars/token estimate instead of a real tokenizer (js-tiktoken is 5MB of Worker bundle); swap in a real one if trimming proves too loose or too tight
+const getUsedTokens = (messages: ChatMessage[], maxTokens: number): number =>
+  messages.reduce((sum, { content, name }) => sum + Math.ceil(((content || '').length + (name || '').length) / 3) + 4, maxTokens);
 
 export const getMessagesByTokens = (inputMessages: ChatMessage[], maxTokens: number, systemGuide: string, postfix: string): ChatMessage[] => {
   let limit = 0;

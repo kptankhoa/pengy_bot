@@ -1,9 +1,6 @@
-import { ChatMessage, RoleEnum, SimplifiedWeather, Weather } from 'models';
+import { ChatMessage, RoleEnum } from 'models';
 import { getWeatherLocationPrompt } from 'const/prompts';
 import { handleMessageRequest } from 'services';
-import { simplifyWeatherObject } from 'utils';
-
-const weather = require('weather-js');
 
 export const getWeatherLocation = async (msg: string)=> {
   const chatHistory: ChatMessage[] = [
@@ -16,19 +13,33 @@ export const getWeatherLocation = async (msg: string)=> {
   return await handleMessageRequest(chatHistory, 'empty');
 };
 
-export const getWeatherRequest = (search: string, callback: (weatherObj: SimplifiedWeather | null) => void) => {
+// Open-Meteo: keyless geocoding + forecast. daily[0] is today.
+export const getWeatherRequest = async (search: string): Promise<object | null> => {
   console.log(`-----weather: search: ${search}`);
-  weather.find({ search, degreeType: 'C' }, (err: any, result: Weather[]) => {
-    if (err || !result.length) {
-      console.error('------weather error-----');
-      console.error({ err, result });
-      callback(null);
-      return;
+  try {
+    const geo = await (await fetch(`https://geocoding-api.open-meteo.com/v1/search?count=1&name=${encodeURIComponent(search)}`))
+      .json<{ results?: { name: string, country: string, latitude: number, longitude: number }[] }>();
+    const place = geo.results?.[0];
+    if (!place) {
+      return null;
     }
-    callback(simplifyWeatherObject(result[0]));
-  });
-};
-
-export const handleWeatherRequest = (search: string, callback: (weatherObject: any) => void) => {
-  getWeatherRequest(search, callback);
+    const params = new URLSearchParams({
+      latitude: String(place.latitude),
+      longitude: String(place.longitude),
+      current: 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code',
+      daily: 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+      timezone: 'auto',
+      forecast_days: '5'
+    });
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if (!res.ok) {
+      throw new Error(`status: ${res.status}`);
+    }
+    const { current, daily } = await res.json<{ current: object, daily: object }>();
+    return { location: `${place.name}, ${place.country}`, note: 'weather_code is WMO code', current, daily };
+  } catch (err) {
+    console.error('------weather error-----');
+    console.error(err);
+    return null;
+  }
 };

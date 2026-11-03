@@ -132,3 +132,7 @@ dist
 .pnp.*
 
 /build
+# wrangler
+.dev.vars
+.wrangler/
+worker-configuration.d.ts

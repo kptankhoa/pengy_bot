@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "lib": ["es6", "dom"],
-    "allowJs": true,
-    "outDir": "build",
-    "rootDir": "src",
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["es2022"],
+    "types": ["./worker-configuration.d.ts", "node"],
+    "noEmit": true,
+    "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
@@ -15,6 +16,7 @@
       "*": [
         "./src/*"
       ]
-    },
-  }
+    }
+  },
+  "include": ["src", "worker-configuration.d.ts"]
 }

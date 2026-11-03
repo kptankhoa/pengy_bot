@@ -1,13 +1,15 @@
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore/lite';
 import { db } from 'libs/firebase';
 import { collectionName } from 'const/firebase';
 import { ChatBot, ChatMode } from 'models';
 import { chatBotMap, defaultBot } from 'const/chat';
+import { cached } from 'utils/cache-util';
 
 const chatBotRef = collection(db, collectionName.chat_bot);
 
-onSnapshot(chatBotRef, (querySnapshot) => {
+export const loadChatBots = cached(async () => {
   console.info('fetch chatbots');
+  const querySnapshot = await getDocs(chatBotRef);
   chatBotMap.clear();
   querySnapshot.forEach((doc) => {
     const data = doc.data();

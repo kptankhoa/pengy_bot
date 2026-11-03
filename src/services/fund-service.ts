@@ -7,7 +7,7 @@ import {
   orderBy,
   query,
   setDoc
-} from 'firebase/firestore';
+} from 'firebase/firestore/lite';
 import { db } from 'libs/firebase';
 import { collectionName } from 'const/firebase';
 import { Fund, FundLog } from 'models';

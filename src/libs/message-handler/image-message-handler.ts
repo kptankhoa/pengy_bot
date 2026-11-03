@@ -13,16 +13,12 @@ export const onImageMessage = async (bot: any, msg: Message) => {
 
   console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date().toISOString()}`);
   console.log(`prompt: ${prompt}`);
-  const imageUrls = await handleImageRequest(prompt);
-  if (!imageUrls || !imageUrls.length) {
+  const image = await handleImageRequest(prompt);
+  if (!image) {
     return bot.sendMessage(chatId, 'Hư quá. vẽ cái khác đi :v', { reply_to_message_id: msg.message_id });
   }
 
-  const medias = imageUrls.map((url) => ({
-    type: 'photo',
-    media: url
-  }));
-  const res1: Message = await bot.sendMediaGroup(chatId, medias, { reply_to_message_id: msg.message_id });
+  const res1: Message = await bot.sendPhoto(chatId, image, { reply_to_message_id: msg.message_id });
 
   await setBotReplyIdMode(chatId, res.message_id, 'no_reply');
   await setBotReplyIdMode(chatId, res1.message_id, 'no_reply');

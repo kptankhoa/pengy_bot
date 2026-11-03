@@ -1,8 +1,5 @@
-require('dotenv').config({ path: process.env.NODE_ENV ? `./env/.env.${process.env.NODE_ENV}` : './.env' });
 
 export const defaultBotName = process.env.BOT_NAME || '';
-
-export const PORT = Number(process.env.PORT || 6969);
 
 export const telegramToken = process.env.BOT_TOKEN || '';
 
@@ -21,3 +18,5 @@ export const completeRequestConfig = {
   presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY || 0),
   frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY || 0)
 };
+
+export const webhookSecret = process.env.WEBHOOK_SECRET || '';

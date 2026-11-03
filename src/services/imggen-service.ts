@@ -1,12 +1,11 @@
 import { RETRY_TIMES } from 'const/settings';
-import { generateImagesLinks } from 'libs/img-gen';
+import { generateImage } from 'libs/img-gen';
 
-export const handleImageRequest = async (prompt: string): Promise<string[] | null> => {
+export const handleImageRequest = async (prompt: string): Promise<Uint8Array | null> => {
   let retries = 0;
   while (retries < RETRY_TIMES) {
     try {
-      const res = await generateImagesLinks(prompt);
-      return res;
+      return await generateImage(prompt);
     } catch (error: any) {
       console.log(error);
       retries++;

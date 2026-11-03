@@ -1,38 +1,20 @@
-import { collection, deleteDoc, doc, getDocs, onSnapshot, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore/lite';
 import { db } from 'libs/firebase';
 import { collectionName } from 'const/firebase';
 import { Dictionary, DictWord } from 'models';
-import { dictionaryMap } from 'const/chat';
 
 export const getDictionary = async (chatId: number): Promise<Dictionary> => {
-  const key = chatId.toString();
-  const dictionary = dictionaryMap.get(key);
-  if (dictionary) {
-    return dictionary;
-  }
-
-  const dictRef = collection(db, collectionName.dictionary, key, collectionName.dictionary);
-  await onSnapshot(dictRef, (querySnapshot) => {
-    const newDictMap = new Map<string, DictWord>();
-    console.info(`fetch dictionary for ${key}`);
-    querySnapshot.forEach((doc) => {
-      newDictMap.set(doc.id, doc.data() as DictWord);
-    });
-    dictionaryMap.set(key, newDictMap);
-  });
+  const dictRef = collection(db, collectionName.dictionary, chatId.toString(), collectionName.dictionary);
   const snapshot = await getDocs(dictRef);
-  const newDictMap = new Map<string, DictWord>();
+  const dictionary = new Map<string, DictWord>();
   snapshot.forEach((doc) => {
-    newDictMap.set(doc.id, doc.data() as DictWord);
+    dictionary.set(doc.id, doc.data() as DictWord);
   });
-  return newDictMap;
+  return dictionary;
 };
 
 export const findWord = async (chatId: number, word: string): Promise<DictWord[] | null> => {
-  const dictionary = dictionaryMap.get(chatId.toString());
-  if (!dictionary) {
-    return null;
-  }
+  const dictionary = await getDictionary(chatId);
   const foundKeys = Array.from(dictionary.keys())
     .filter((key) => key.toLowerCase().includes(word.toLowerCase()));
   if (!foundKeys.length) {

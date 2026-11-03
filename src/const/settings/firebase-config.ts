@@ -1,4 +1,3 @@
-require('dotenv').config({ path: process.env.NODE_ENV ? `./env/.env.${process.env.NODE_ENV}` : './.env' });
 
 export const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
