@@ -14,7 +14,9 @@ export const onWeatherMessage = async (bot: any, msg: Message) => {
 
   const weatherObject = await getWeatherRequest(location.substring(0, location.length - 1));
   if (!weatherObject) {
-    return bot.sendMessage(chatId, `${defaultMessage}, ở địa ngục ha j?`, { reply_to_message_id: msg.message_id });
+    return bot.sendMessage(chatId, defaultMessage, {
+      reply_to_message_id: msg.message_id,
+    });
   }
   bot.sendChatAction(chatId, 'typing');
   const newMsg: Message = {
