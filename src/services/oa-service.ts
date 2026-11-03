@@ -1,5 +1,6 @@
 import {
   apiKey,
+  baseUrl,
   completeRequestConfig,
   defaultMaxTokens,
   defaultMessage,
@@ -14,7 +15,7 @@ const getReplyMessage = async (request: object): Promise<string> => {
   let retries = 0;
   while (retries < RETRY_TIMES) {
     try {
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      const res = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
         body: JSON.stringify(request)

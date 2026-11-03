@@ -3,6 +3,8 @@ export const defaultBotName = process.env.BOT_NAME || '';
 
 export const telegramToken = process.env.BOT_TOKEN || '';
 
+export const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
+
 export const apiKey = process.env.OPENAI_API_KEY || '';
 
 export const defaultMessage = process.env.OPENAI_DEFAULT_RESPONSE || '';
@@ -15,8 +17,8 @@ export const completeRequestConfig = {
   top_p: Number(process.env.OPENAI_TOP_P || 0),
   n: 1,
   stream: false,
-  presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY || 0),
-  frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY || 0)
+  ...Number(process.env.OPENAI_PRESENCE_PENALTY) && { presence_penalty: Number(process.env.OPENAI_PRESENCE_PENALTY) },
+  ...Number(process.env.OPENAI_FREQUENCY_PENALTY) && { frequency_penalty: Number(process.env.OPENAI_FREQUENCY_PENALTY) }
 };
 
 export const webhookSecret = process.env.WEBHOOK_SECRET || '';
