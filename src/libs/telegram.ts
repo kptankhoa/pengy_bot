@@ -1,4 +1,5 @@
 import { telegramToken } from 'const/settings';
+import { splitText } from 'utils/split-text';
 
 const call = async (method: string, body: object | FormData) => {
   const isForm = body instanceof FormData;
@@ -14,9 +15,20 @@ const call = async (method: string, body: object | FormData) => {
   return json.result;
 };
 
+const sendMessage = async (chat_id: number | string, text: string, options: Record<string, any> = {}) => {
+  const [first, ...others] = splitText(text);
+  let res = await call('sendMessage', { chat_id, text: first, ...options });
+  // Only the first chunk replies to the user's message; callers get the last chunk's id
+  const restOptions = { ...options, reply_to_message_id: undefined, entities: undefined };
+  for (const chunk of others) {
+    res = await call('sendMessage', { chat_id, text: chunk, ...restOptions });
+  }
+  return res;
+};
+
 // Same method names as node-telegram-bot-api so the message handlers stay unchanged.
 export const createBot = () => ({
-  sendMessage: (chat_id: number | string, text: string, options = {}) => call('sendMessage', { chat_id, text, ...options }),
+  sendMessage,
   sendSticker: (chat_id: number, sticker: string, options = {}) => call('sendSticker', { chat_id, sticker, ...options }),
   sendChatAction: (chat_id: number, action: string) => call('sendChatAction', { chat_id, action }).catch(console.error),
   getStickerSet: (name: string) => call('getStickerSet', { name }),

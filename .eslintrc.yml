@@ -38,6 +38,9 @@ rules:
      - off
   '@typescript-eslint/no-var-requires':
      - off
+  import/no-unresolved:
+    - error
+    - ignore: ['^cloudflare:']
 settings:
   import/resolver:
     typescript: true

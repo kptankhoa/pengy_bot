@@ -23,8 +23,10 @@ export const addNewMessage = async (chatId: number, mode: string, msgId: number,
   const historyId = getChatHistoryKey(chatId, mode);
   const messageRef = doc(db, collectionName.chat_history, historyId, collectionName.message, msgId.toString());
   const historyRef = doc(db, collectionName.chat_history, historyId);
-  await setDoc(messageRef, { ...msg, updatedAt: timestamp });
-  await setDoc(historyRef, { updatedAt: timestamp });
+  await Promise.all([
+    setDoc(messageRef, { ...msg, updatedAt: timestamp }),
+    setDoc(historyRef, { updatedAt: timestamp })
+  ]);
 };
 
 export const resetChatHistory = async (chatId: number, mode: string) => {

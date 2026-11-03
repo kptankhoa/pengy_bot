@@ -8,10 +8,14 @@ import {
   RETRY_TIMES
 } from 'const/settings';
 import { getChatBot } from 'services';
-import { getMessagesByTokens, getName } from 'utils';
+import { getMessagesByTokens, getName, getUsedTokens } from 'utils';
 import { ChatMessage } from 'models';
 
-const getReplyMessage = async (request: object): Promise<string> => {
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+class NonRetryableError extends Error {}
+
+const getReplyMessage = async (request: object, estimatedTokens: number): Promise<string> => {
   let retries = 0;
   while (retries < RETRY_TIMES) {
     try {
@@ -21,14 +25,22 @@ const getReplyMessage = async (request: object): Promise<string> => {
         body: JSON.stringify(request)
       });
       if (!res.ok) {
-        throw new Error(`status: ${res.status}, ${await res.text()}`);
+        const message = `status: ${res.status}, ${await res.text()}`;
+        // 4xx other than rate limiting won't change on retry
+        throw res.status >= 400 && res.status < 500 && res.status !== 429 ? new NonRetryableError(message) : new Error(message);
       }
-      const completion = await res.json<{ choices: { message?: { content?: string } }[] }>();
+      const completion = await res.json<{ choices: { message?: { content?: string } }[], usage?: { prompt_tokens: number } }>();
+      // compare with getUsedTokens' chars/3 guess to tune it
+      console.log(`prompt tokens: estimated ${estimatedTokens}, actual ${completion.usage?.prompt_tokens}`);
       return completion.choices[0].message?.content || defaultMessage;
     } catch (error: any) {
       console.error('-----error, retries time: ' + retries);
       console.error('error message: ' + error.message);
+      if (error instanceof NonRetryableError) {
+        break;
+      }
       retries++;
+      await sleep(500 * 2 ** retries);
     }
   }
   return defaultMessage;
@@ -49,5 +61,5 @@ export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode:
     messages,
     max_tokens: maxTokens,
     ...completeRequestConfig
-  });
+  }, getUsedTokens(messages, 0));
 };

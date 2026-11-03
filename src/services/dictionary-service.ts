@@ -13,6 +13,20 @@ export const getDictionary = async (chatId: number): Promise<Dictionary> => {
   return dictionary;
 };
 
+const DICTIONARY_TTL = 60_000;
+const dictionaryCache = new Map<number, { expires: number, dictionary: Dictionary }>();
+
+// For the chat prompt only: other callers need fresh data, and a stale vocab list there is harmless.
+export const getCachedDictionary = async (chatId: number): Promise<Dictionary> => {
+  const hit = dictionaryCache.get(chatId);
+  if (hit && hit.expires > Date.now()) {
+    return hit.dictionary;
+  }
+  const dictionary = await getDictionary(chatId);
+  dictionaryCache.set(chatId, { expires: Date.now() + DICTIONARY_TTL, dictionary });
+  return dictionary;
+};
+
 export const findWord = async (chatId: number, word: string): Promise<DictWord[] | null> => {
   const dictionary = await getDictionary(chatId);
   const foundKeys = Array.from(dictionary.keys())

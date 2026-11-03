@@ -6,6 +6,7 @@
     "lib": ["es2022"],
     "types": ["./worker-configuration.d.ts", "node"],
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "strict": true,
     "noImplicitAny": true,

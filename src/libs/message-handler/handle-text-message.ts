@@ -4,7 +4,7 @@ import {
   getChatBot,
   getChatBotRegEx,
   getChatHistory,
-  getDictionary,
+  getCachedDictionary,
   handleMessageRequest,
   setBotReplyIdMode,
   setLastInteractionMode
@@ -21,7 +21,6 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
   const receivedTime = Date.now();
   const sendOptions = { reply_to_message_id: msg.message_id };
   const chatHistory = await getChatHistory(chatId, chatBot.id);
-  console.log(msg);
   const chatContent = msg.text?.startsWith('/') ? msg.text.replace(getChatBotRegEx(mode), '').trim() : msg.text;
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
   const name = msg.from.username || msg.from.first_name || '';
@@ -34,7 +33,7 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
   });
   const getExtraPrompt = async (): Promise<string> => {
     if (useExtraVocab(chatId) && (extraVocabModes(chatId)).includes(mode)) {
-      const dictionary = await getDictionary(chatId);
+      const dictionary = await getCachedDictionary(chatId);
       const vocabs = Array
         .from(dictionary.values())
         .reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr) }), {});
@@ -58,8 +57,10 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
     role: RoleEnum.ASSISTANT
   };
 
-  await addNewMessage(chatId, chatBot.id, msg.message_id, newUserMsg, receivedTime);
-  await addNewMessage(chatId, chatBot.id, res.message_id, newBotMessage, repliedTime);
-  await setBotReplyIdMode(chatId, res.message_id, mode);
-  await setLastInteractionMode(chatId, mode);
+  await Promise.all([
+    addNewMessage(chatId, chatBot.id, msg.message_id, newUserMsg, receivedTime),
+    addNewMessage(chatId, chatBot.id, res.message_id, newBotMessage, repliedTime),
+    setBotReplyIdMode(chatId, res.message_id, mode),
+    setLastInteractionMode(chatId, mode)
+  ]);
 };
