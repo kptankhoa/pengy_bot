@@ -137,3 +137,5 @@ dist
 .wrangler/
 worker-configuration.d.ts
 secrets.json
+.env.*
+!.env.example

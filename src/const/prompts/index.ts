@@ -7,6 +7,7 @@ export const getWeatherDetailPrompt = (text: string) => `Given the following JSO
 
 export const getExtraVocabularyPrompt = (obj: any) => `\tThe following JSON will contain some words with theirs meanings to consolidate your vocabulary: ${JSON.stringify(obj)}.`;
 
-export const getTimePrompt = () => `\tThe current timestamp is ${moment(Date.now()).utcOffset('+0700').format('DD/MM/yyyy HH:mm')} in case there are questions about time. Use GMT+7 timezone by default.`;
+export const getTimePrompt = () =>
+  `\tThe current timestamp is ${moment(Date.now()).utcOffset("+0700").format("DD/MM/yyyy HH:mm")} in case there are questions about time. Use GMT+7 timezone by default. Reply in plain text only, no Markdown.`;
 
 export const getNotePrompt = (text: string, notes: Note[]) => `Given the following JSON containing a note object with its content and who made it: ${JSON.stringify(notes)}. Using Vietnamese, answer the following request: ${text}`;

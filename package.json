@@ -1,7 +1,7 @@
 {
-  "name": "chillax_goodboi_bot",
+  "name": "pengy_bot",
   "version": "1.0.0",
-  "description": "chillax goodboi bot vui ve",
+  "description": "pengy_bot vui ve",
   "main": "src/index.ts",
   "scripts": {
     "dev": "wrangler dev",
