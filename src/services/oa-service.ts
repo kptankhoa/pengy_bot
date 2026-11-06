@@ -109,7 +109,7 @@ const runSearchTool = async (argumentsText: string): Promise<string> => {
 export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode: string, extraPrompt = '') => {
   const { postfix, systemGuide, tokens } = getChatBot(chatMode);
   const maxTokens = tokens || defaultMaxTokens;
-  const canSearchWeb = getChatBot(chatMode).key === 'c';
+  const canSearchWeb = getChatBot(chatMode).key === 'c' || chatMode === 'search';
   const guide = systemGuide.concat(extraPrompt, canSearchWeb ? getWebSearchToolPrompt() : '');
   const shortenHistory = [...chatHistory]
     .splice(chatHistory.length - MESSAGE_LIMIT)
@@ -132,7 +132,7 @@ export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode:
   }
 
   request.tools = [searchTool];
-  request.tool_choice = 'auto';
+  request.tool_choice = chatMode === 'search' ? 'required' : 'auto';
   const toolFlowStarted = Date.now();
   const firstResponse = await getReplyMessage(request, getUsedTokens(messages, 0), toolFlowStarted, TOOL_DECISION_BUDGET_MS);
   const toolCalls = (firstResponse.tool_calls || []).filter((toolCall) =>

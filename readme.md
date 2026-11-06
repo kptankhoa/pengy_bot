@@ -15,4 +15,4 @@ The bot runs as a Worker driven by a Telegram webhook (no polling).
 
 Local dev: copy the vars from `.env.example` into `.env` (gitignored), then run `npm run dev`.
 
-Use `/search <query>` in Telegram to search the web and get a Vietnamese answer with source links. The `/c` chatbot can also choose web search when it needs current information. `WEB_SEARCH_API_KEY` is optional; without it the bot uses Mwmbl's anonymous access. Add it as a Wrangler secret to use your keyed quota.
+Use `/s <query>` in Telegram to search the web and get a Vietnamese answer with source links. The `/c` chatbot can also choose web search when it needs current information. `WEB_SEARCH_API_KEY` is optional; without it the bot uses Mwmbl's anonymous access. Add it as a Wrangler secret to use your keyed quota.

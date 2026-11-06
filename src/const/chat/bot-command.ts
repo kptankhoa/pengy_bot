@@ -3,7 +3,7 @@ export const BOT_COMMAND = {
   IMAGE: new RegExp('^/i +'),
   WEATHER: new RegExp('^/b +'),
   NEWS: new RegExp('^/n +'),
-  SEARCH: new RegExp('^/search(?:@[\\w_]+)?(?:\\s+|$)'),
+  SEARCH: new RegExp('^/s(?:@[\\w_]+)?(?:\\s+|$)'),
   DICT: new RegExp('^/dict'),
   FUND: new RegExp('^/fund'),
   NOTE: new RegExp('^/note'),
