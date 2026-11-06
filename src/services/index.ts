@@ -8,3 +8,4 @@ export * from './imggen-service';
 export * from './news-service';
 export * from './oa-service';
 export * from './weather-service';
+export * from './web-search-service';

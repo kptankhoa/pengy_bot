@@ -47,6 +47,10 @@ const onTextMsg = (msg: Message) => {
     return messageHandler.onNews(msg);
   }
 
+  if (BOT_COMMAND.SEARCH.test(chatText)) {
+    return messageHandler.onSearch(msg);
+  }
+
   if (BOT_COMMAND.DICT.test(chatText)) {
     return messageHandler.onDictionary(msg);
   }

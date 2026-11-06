@@ -15,7 +15,7 @@ import { extraVocabModes, useExtraVocab } from 'libs/firebase';
 import { printWithoutWord } from 'utils';
 import { getExtraVocabularyPrompt, getTimePrompt } from 'const/prompts';
 
-export const handleChatMessage = async (bot: any, msg: Message, mode: string) => {
+export const handleChatMessage = async (bot: any, msg: Message, mode: string, additionalPrompt = '') => {
   const chatId = msg.chat.id;
   const chatBot = getChatBot(mode);
   const receivedTime = Date.now();
@@ -37,10 +37,10 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string) =>
       const vocabs = Array
         .from(dictionary.values())
         .reduce((prev: any, curr: DictWord) => ({ ...prev, [curr.word]: printWithoutWord(curr) }), {});
-      return getExtraVocabularyPrompt(vocabs).concat(getTimePrompt());
+      return getExtraVocabularyPrompt(vocabs).concat(additionalPrompt, getTimePrompt());
     }
 
-    return getTimePrompt();
+    return additionalPrompt.concat(getTimePrompt());
   };
 
   const replyContent = await handleMessageRequest([...chatHistory, newUserMsg], mode, await getExtraPrompt());

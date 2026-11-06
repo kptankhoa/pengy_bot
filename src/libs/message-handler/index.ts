@@ -7,6 +7,7 @@ import { onWeatherMessage } from './weather-message-handler';
 import { onDictionaryMessage } from './dictionary-message-handler';
 import { onFundMessage } from './fund-message-handler';
 import { onNoteMessage } from './note-message-handler';
+import { onSearchMessage } from './search-message-handler';
 
 export const getMessageHandler = (bot: any) => ({
   onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),
@@ -16,5 +17,6 @@ export const getMessageHandler = (bot: any) => ({
   onWeather: (msg: Message) => onWeatherMessage(bot, msg),
   onDictionary: (msg: Message) => onDictionaryMessage(bot, msg),
   onFund: (msg: Message) => onFundMessage(bot, msg),
-  onNote: (msg: Message) => onNoteMessage(bot, msg)
+  onNote: (msg: Message) => onNoteMessage(bot, msg),
+  onSearch: (msg: Message) => onSearchMessage(bot, msg)
 });
