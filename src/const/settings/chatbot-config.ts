@@ -7,7 +7,7 @@ export const baseUrl = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v
 
 export const apiKey = process.env.OPENAI_API_KEY || '';
 
-export const webSearchApiKey = process.env.WEB_SEARCH_API_KEY || '';
+export const tavilyApiKey = process.env.TAVILY_API_KEY || '';
 
 export const defaultMessage = process.env.OPENAI_DEFAULT_RESPONSE || '';
 

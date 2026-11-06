@@ -1,4 +1,4 @@
-import { webSearchApiKey } from 'const/settings';
+import { tavilyApiKey } from 'const/settings';
 
 export interface WebSearchResult {
   title: string;
@@ -6,9 +6,9 @@ export interface WebSearchResult {
   snippet: string;
 }
 
-const SEARCH_ENDPOINT = 'https://api.mwmbl.org/api/v2/search/';
+const SEARCH_ENDPOINT = 'https://api.tavily.com/search';
 const RESULT_LIMIT = 5;
-const REQUEST_TIMEOUT_MS = 3000;
+const REQUEST_TIMEOUT_MS = 5000;
 
 const toBoundedText = (value: unknown, maxLength: number): string =>
   typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
@@ -32,18 +32,32 @@ export const searchWeb = async (query: string): Promise<WebSearchResult[]> => {
     return [];
   }
 
-  const url = new URL(SEARCH_ENDPOINT);
-  url.searchParams.set('q', normalizedQuery);
+  const apiKey = tavilyApiKey.trim();
+  if (!apiKey) {
+    console.error('Tavily API key is not configured');
+    return [];
+  }
 
   try {
-    const headers: Record<string, string> = { Accept: 'application/json' };
-    const apiKey = webSearchApiKey.trim();
-    if (apiKey) {
-      headers['X-API-Key'] = apiKey;
-    }
-
-    const response = await fetch(url, { headers, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+    const response = await fetch(SEARCH_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: normalizedQuery,
+        search_depth: 'basic',
+        max_results: RESULT_LIMIT,
+        chunks_per_source: 2,
+        include_answer: false,
+        include_raw_content: false
+      }),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
+    });
     if (!response.ok) {
+      console.error('Tavily search request failed', response.status);
       return [];
     }
 
@@ -57,7 +71,7 @@ export const searchWeb = async (query: string): Promise<WebSearchResult[]> => {
       .map((result) => ({
         title: toBoundedText(result.title, 160),
         url: isHttpUrl(result.url) ? result.url : '',
-        snippet: toBoundedText(result.content ?? result.extract ?? result.description, 500)
+        snippet: toBoundedText(result.content, 700)
       }))
       .filter((result) => result.title && result.url)
       .slice(0, RESULT_LIMIT);
