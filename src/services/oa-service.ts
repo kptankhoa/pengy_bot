@@ -9,7 +9,7 @@ import {
 } from 'const/settings';
 import { getChatBot } from 'services';
 import { getMessagesByTokens, getName, getUsedTokens } from 'utils';
-import { ChatMessage } from 'models';
+import { ChatMessage, RoleEnum } from 'models';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -61,7 +61,11 @@ export const handleMessageRequest = async (chatHistory: ChatMessage[], chatMode:
   const guide = systemGuide.concat(extraPrompt);
   const shortenHistory = [...chatHistory]
     .splice(chatHistory.length - MESSAGE_LIMIT)
-    .map((msg: ChatMessage) => ({ ...msg, name: getName(msg.name || '') }));
+    .map((msg: ChatMessage) => {
+      const name = getName(msg.name || '');
+      // Gemini's OpenAI-compat layer ignores `name`, so also put the speaker in the text
+      return { ...msg, name, content: msg.role === RoleEnum.USER && name ? `${name}: ${msg.content}` : msg.content };
+    });
   const messages = getMessagesByTokens(shortenHistory, maxTokens, guide, postfix);
   console.log('------input------');
   [messages[0], messages[messages.length - 1]].map((msg) => console.log(`${msg.name || msg.role}: ${msg.content}`));
