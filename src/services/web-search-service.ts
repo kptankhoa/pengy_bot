@@ -8,7 +8,7 @@ export interface WebSearchResult {
 
 const SEARCH_ENDPOINT = 'https://api.mwmbl.org/api/v2/search/';
 const RESULT_LIMIT = 5;
-const REQUEST_TIMEOUT_MS = 5000;
+const REQUEST_TIMEOUT_MS = 3000;
 
 const toBoundedText = (value: unknown, maxLength: number): string =>
   typeof value === 'string' ? value.trim().slice(0, maxLength) : '';

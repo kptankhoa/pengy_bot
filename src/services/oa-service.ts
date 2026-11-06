@@ -18,8 +18,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // Workers cancel waitUntil work 30s after the response, so the LLM step must finish well inside that.
 const ATTEMPT_TIMEOUT_MS = 18_000;
 const LLM_BUDGET_MS = 22_000;
-const TOOL_FLOW_BUDGET_MS = 25_000;
-const TOOL_DECISION_BUDGET_MS = 7000;
+const TOOL_FLOW_BUDGET_MS = 20_000;
+const TOOL_DECISION_BUDGET_MS = 8000;
 
 class NonRetryableError extends Error {}
 
