@@ -18,7 +18,6 @@ export const onWeatherMessage = async (bot: any, msg: Message) => {
       reply_to_message_id: msg.message_id,
     });
   }
-  bot.sendChatAction(chatId, 'typing');
   const newMsg: Message = {
     ...msg,
     text: `${weatherPrompt}\n${JSON.stringify(weatherObject, null, 2)}`.trim()

@@ -9,7 +9,6 @@ export const onImageMessage = async (bot: any, msg: Message) => {
 
   const res: Message = await bot.sendMessage(chatId, 'Đang vẽ chờ xíu', { reply_to_message_id: msg.message_id });
 
-  bot.sendChatAction(chatId, 'typing');
 
   console.log(`\n\n--------image request from: ${isPrivate ? msg.chat.username : msg.chat.title}, message_id: ${msg.message_id}, time: ${new Date().toISOString()}`);
   console.log(`prompt: ${prompt}`);

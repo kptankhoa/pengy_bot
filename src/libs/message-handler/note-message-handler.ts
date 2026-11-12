@@ -72,7 +72,6 @@ const handleNoteRequest = async (bot: any, msg: Message) => {
   const chatId = msg.chat.id;
   const text = msg.text.replace(BOT_COMMAND.NOTE, '').trim();
   const notes = await getAllNotes(chatId);
-  bot.sendChatAction(chatId, 'typing');
 
   const newMsg: Message = {
     ...msg,

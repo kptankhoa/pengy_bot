@@ -25,7 +25,6 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string, ad
   const isPrivate = msg.chat.type === MessageType.PRIVATE;
   const name = msg.from.username || msg.from.first_name || '';
   console.log(`\n\n--------from: ${isPrivate ? name : msg.chat.title}, chat_id: ${chatId}, message_id: ${msg.message_id}, mode: ${mode}, time: ${moment(Date.now()).utcOffset('+0700').format('DD/MM/yyyy HH:mm')}`);
-  bot.sendChatAction(chatId, 'typing');
   const newUserMsg: ChatMessage = ({
     name,
     content: chatContent,

@@ -66,20 +66,12 @@ const onTextMsg = (msg: Message) => {
   return messageHandler.onNewMessage(msg);
 };
 
-// Telegram clears the typing indicator after ~5s, so resend until the reply is out.
-const keepTyping = (chatId: number) => {
-  const send = () => bot.sendChatAction(chatId, 'typing');
-  send();
-  const timer = setInterval(send, 4000);
-  return () => clearInterval(timer);
-};
-
 export const handleUpdate = async (update: { message?: Message }) => {
   const msg = update.message;
   if (!msg?.text) {
     return;
   }
-  const stopTyping = keepTyping(msg.chat.id);
+  const stopTyping = bot.startTyping(msg.chat.id);
   try {
     await processMessage(msg);
   } finally {
