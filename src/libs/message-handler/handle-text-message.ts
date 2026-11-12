@@ -10,6 +10,7 @@ import {
   setLastInteractionMode
 } from 'services';
 import { pepeStickerMap } from 'const/chat';
+import { defaultMessage } from 'const/settings';
 import moment from 'moment';
 import { extraVocabModes, useExtraVocab } from 'libs/firebase';
 import { printWithoutWord } from 'utils';
@@ -46,8 +47,16 @@ export const handleChatMessage = async (bot: any, msg: Message, mode: string, ad
 
   console.log('------output------');
   console.log(`${chatBot.name}: ${replyContent}`);
+  const failed = !!defaultMessage && replyContent === defaultMessage;
+  const replyOptions = failed
+    ? { ...sendOptions, reply_markup: { inline_keyboard: [[{ text: '🔄 Thử lại', callback_data: 'retry' }]] } }
+    : sendOptions;
   const stickerFileId = pepeStickerMap.get(replyContent);
-  const res: Message = stickerFileId ? await bot.sendSticker(chatId, stickerFileId, sendOptions) : await bot.sendMessage(chatId, replyContent, sendOptions);
+  const res: Message = stickerFileId ? await bot.sendSticker(chatId, stickerFileId, replyOptions) : await bot.sendMessage(chatId, replyContent, replyOptions);
+  if (failed) {
+    // Keep the failed turn out of history so a retry doesn't duplicate the question
+    return;
+  }
   const repliedTime = Date.now();
 
   const newBotMessage: ChatMessage = {

@@ -15,11 +15,11 @@ import { getWebSearchToolPrompt } from 'const/prompts';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Workers cancel waitUntil work 30s after the response. Attempts are capped at 8s so a hung call can still be retried inside each budget.
-const ATTEMPT_TIMEOUT_MS = 8000;
-const LLM_BUDGET_MS = 24_000;
-const TOOL_FLOW_BUDGET_MS = 26_000;
-const TOOL_DECISION_BUDGET_MS = 18_000;
+// Workers cancel waitUntil work 30s after the response, so the LLM step must finish well inside that.
+const ATTEMPT_TIMEOUT_MS = 18_000;
+const LLM_BUDGET_MS = 22_000;
+const TOOL_FLOW_BUDGET_MS = 20_000;
+const TOOL_DECISION_BUDGET_MS = 8000;
 
 class NonRetryableError extends Error {}
 

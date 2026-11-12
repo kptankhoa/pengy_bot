@@ -66,11 +66,34 @@ const onTextMsg = (msg: Message) => {
   return messageHandler.onNewMessage(msg);
 };
 
-export const handleUpdate = async (update: { message?: Message }) => {
-  const msg = update.message;
-  if (!msg?.text) {
-    return;
+interface CallbackQuery {
+  id: string;
+  data?: string;
+  message?: { message_id: number, chat: { id: number }, reply_to_message?: Message };
+}
+
+// Per-isolate guard against double taps on the same retry button
+const retrying = new Set<number>();
+
+export const handleUpdate = async (update: { message?: Message, callback_query?: CallbackQuery }) => {
+  const callback = update.callback_query;
+  if (callback?.data === 'retry') {
+    await bot.answerCallbackQuery(callback.id);
+    const failedReply = callback.message;
+    const original = failedReply?.reply_to_message;
+    if (!failedReply || !original?.text || retrying.has(failedReply.message_id)) {
+      return;
+    }
+    retrying.add(failedReply.message_id);
+    await bot.deleteMessage(failedReply.chat.id, failedReply.message_id);
+    return run(original);
   }
+  if (update.message?.text) {
+    return run(update.message);
+  }
+};
+
+const run = async (msg: Message) => {
   const stopTyping = bot.startTyping(msg.chat.id);
   try {
     await processMessage(msg);
