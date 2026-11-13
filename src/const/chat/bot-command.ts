@@ -6,5 +6,6 @@ export const BOT_COMMAND = {
   SEARCH: new RegExp('^/s(?:@[\\w_]+)?(?:\\s+|$)'),
   DICT: new RegExp('^/dict'),
   FUND: new RegExp('^/fund'),
+  PRICE: new RegExp('^/pr(?:@[\\w_]+)?(?:\\s|$)'),
   NOTE: new RegExp('^/note'),
 };

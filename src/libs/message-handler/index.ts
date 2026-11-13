@@ -8,6 +8,7 @@ import { onDictionaryMessage } from './dictionary-message-handler';
 import { onFundMessage } from './fund-message-handler';
 import { onNoteMessage } from './note-message-handler';
 import { onSearchMessage } from './search-message-handler';
+import { onPriceMessage } from './price-message-handler';
 
 export const getMessageHandler = (bot: any) => ({
   onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),
@@ -18,5 +19,6 @@ export const getMessageHandler = (bot: any) => ({
   onDictionary: (msg: Message) => onDictionaryMessage(bot, msg),
   onFund: (msg: Message) => onFundMessage(bot, msg),
   onNote: (msg: Message) => onNoteMessage(bot, msg),
-  onSearch: (msg: Message) => onSearchMessage(bot, msg)
+  onSearch: (msg: Message) => onSearchMessage(bot, msg),
+  onPrice: (msg: Message) => onPriceMessage(bot, msg)
 });
