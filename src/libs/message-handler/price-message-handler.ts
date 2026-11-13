@@ -85,7 +85,7 @@ const getEconomicLines = async (apiKey: string): Promise<string[]> => {
   return lines;
 };
 
-const getPriceMessage = async (): Promise<string> => {
+export const getPriceMessage = async (): Promise<string> => {
   const apiKey = process.env.DULIEU_API_KEY;
   const sections: string[] = [];
   const failures: string[] = [];

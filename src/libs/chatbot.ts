@@ -63,6 +63,10 @@ const onTextMsg = (msg: Message) => {
     return messageHandler.onPrice(msg);
   }
 
+  if (BOT_COMMAND.CHAT_INFO.test(chatText)) {
+    return messageHandler.onChatInfo(msg);
+  }
+
   if (BOT_COMMAND.NOTE.test(chatText)) {
     return messageHandler.onNote(msg);
   }

@@ -9,6 +9,7 @@ import { onFundMessage } from './fund-message-handler';
 import { onNoteMessage } from './note-message-handler';
 import { onSearchMessage } from './search-message-handler';
 import { onPriceMessage } from './price-message-handler';
+import { onChatInfoMessage } from './chat-info-message-handler';
 
 export const getMessageHandler = (bot: any) => ({
   onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),
@@ -20,5 +21,6 @@ export const getMessageHandler = (bot: any) => ({
   onFund: (msg: Message) => onFundMessage(bot, msg),
   onNote: (msg: Message) => onNoteMessage(bot, msg),
   onSearch: (msg: Message) => onSearchMessage(bot, msg),
-  onPrice: (msg: Message) => onPriceMessage(bot, msg)
+  onPrice: (msg: Message) => onPriceMessage(bot, msg),
+  onChatInfo: (msg: Message) => onChatInfoMessage(bot, msg)
 });

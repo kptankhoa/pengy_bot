@@ -15,6 +15,7 @@ export interface Message {
         username: string,
         type: MessageType,
     },
+    message_thread_id?: number,
     reply_to_message?: {
         message_id: number,
     },

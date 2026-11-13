@@ -7,5 +7,6 @@ export const BOT_COMMAND = {
   DICT: new RegExp('^/dict'),
   FUND: new RegExp('^/fund'),
   PRICE: new RegExp('^/pr(?:@[\\w_]+)?(?:\\s|$)'),
+  CHAT_INFO: new RegExp('^/ci(?:@[\\w_]+)?(?:\\s|$)'),
   NOTE: new RegExp('^/note'),
 };
