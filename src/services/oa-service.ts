@@ -19,7 +19,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const ATTEMPT_TIMEOUT_MS = 18_000;
 const LLM_BUDGET_MS = 22_000;
 const TOOL_FLOW_BUDGET_MS = 20_000;
-const TOOL_DECISION_BUDGET_MS = 8000;
+const TOOL_DECISION_BUDGET_MS = 10_000;
 
 class NonRetryableError extends Error {}
 
