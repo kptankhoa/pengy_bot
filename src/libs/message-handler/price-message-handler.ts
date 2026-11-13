@@ -8,9 +8,18 @@ type ApiResponse<T> = {
 
 type GoldPrice = {
   type_code?: string;
+  type?: string;
+  name?: string;
   buy?: number;
   sell?: number;
   update_time?: number;
+};
+
+type GoldResponse = GoldPrice & {
+  success?: boolean;
+  timestamp?: number;
+  current_time?: number;
+  data?: GoldPrice | GoldPrice[];
 };
 
 type EconomicPrice = {
@@ -41,16 +50,17 @@ const fetchJson = async <T>(url: string, headers?: HeadersInit): Promise<T> => {
 };
 
 const getGoldLines = async (): Promise<string[]> => {
-  const response = await fetchJson<{ success?: boolean; current_time?: number; data?: GoldPrice[] }>(
+  const response = await fetchJson<GoldResponse>(
     'https://www.vang.today/api/prices?type=SJL1L10'
   );
-  const price = response.data?.[0];
+  const data = response.data ?? response;
+  const price = Array.isArray(data) ? data[0] : data;
   if (!response.success || !price) {
     throw new Error('Không có dữ liệu');
   }
-  const updatedAt = price.update_time || response.current_time;
+  const updatedAt = price.update_time || response.timestamp || response.current_time;
   return [
-    `🟡 Vàng SJC: mua ${formatVnd(price.buy)} / bán ${formatVnd(price.sell)}`,
+    `🟡 ${price.name || 'Vàng SJC'}: mua ${formatVnd(price.buy)} / bán ${formatVnd(price.sell)}`,
     ...(updatedAt ? [`   Cập nhật: ${new Date(updatedAt * 1000).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`] : [])
   ];
 };
