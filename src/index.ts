@@ -1,6 +1,6 @@
 import { handleUpdate } from 'libs/chatbot';
 import { webhookSecret } from 'const/settings';
-import { PRICE_ALERT_CHAT_ID } from 'const/chat';
+import { PRICE_ALERT_CHAT_ID, PRICE_ALERT_TOPIC_ID } from 'const/chat';
 import { createBot } from 'libs/telegram';
 import { getPriceMessage } from 'libs/message-handler/price-message-handler';
 
@@ -19,7 +19,7 @@ export default {
   },
   async scheduled(_controller: ScheduledController, _env: unknown, ctx: ExecutionContext) {
     ctx.waitUntil(getPriceMessage()
-      .then((message) => bot.sendMessage(PRICE_ALERT_CHAT_ID, message))
+      .then((message) => bot.sendMessage(PRICE_ALERT_CHAT_ID, message, { message_thread_id: PRICE_ALERT_TOPIC_ID }))
       .catch((error) => console.error('Daily price notification failed', error)));
   }
 };

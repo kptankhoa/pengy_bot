@@ -1,3 +1,4 @@
-export const PRICE_ALERT_CHAT_ID = '867570638';
+export const PRICE_ALERT_CHAT_ID = '-1003965420870';
+export const PRICE_ALERT_TOPIC_ID = 24883;
 
 export const NOTI_GROUP_ID = '-980061380';
