@@ -102,6 +102,7 @@ export const handleUpdate = async (update: { message?: Message, callback_query?:
 };
 
 const run = async (msg: Message) => {
+  console.log(`user ${msg.from?.id} (@${msg.from?.username || msg.from?.first_name}) in ${msg.chat.type} ${msg.chat.id}`);
   if (blockedUserIds.has(String(msg.from?.id))) {
     return bot.sendMessage(msg.chat.id, blockedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
   }
