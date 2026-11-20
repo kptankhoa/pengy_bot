@@ -38,13 +38,6 @@ type EconomicPrice = {
   bank?: string;
   term_months?: number;
   deposit_rate?: number;
-  lending_rate?: number;
-  channel?: string | null;
-};
-
-type CryptoPriceResponse = {
-  bitcoin?: { vnd?: number };
-  ethereum?: { vnd?: number };
 };
 
 const formatVnd = (value?: number) => typeof value === 'number'
@@ -70,68 +63,99 @@ const getGoldLines = async (): Promise<string[]> => {
   }
   const updatedAt = price.update_time || response.timestamp || response.current_time;
   return [
-    `🟡 ${price.name || 'Vàng SJC'}: mua ${formatVnd(price.buy)} / bán ${formatVnd(price.sell)}`,
-    ...(updatedAt ? [`   Cập nhật: ${new Date(updatedAt * 1000).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`] : [])
+    `🟡 VÀNG · ${price.name || 'SJC'}`,
+    `Mua ${formatVnd(price.buy)}  ·  Bán ${formatVnd(price.sell)}`,
+    ...(updatedAt ? [`🕘 ${new Date(updatedAt * 1000).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}`] : [])
   ];
 };
 
 const getEconomicLines = async (apiKey: string): Promise<string[]> => {
   const headers = { Authorization: `Bearer ${apiKey}` };
-  const [fuel, interest] = await Promise.all([
+  const [exchange, fuel, interest] = await Promise.all([
+    fetchJson<ApiResponse<EconomicPrice>>('https://dulieu.dev/api/exchange?source=vietcombank.com.vn&limit=100', headers),
     fetchJson<ApiResponse<EconomicPrice>>('https://dulieu.dev/api/fuel?limit=100', headers),
     fetchJson<ApiResponse<EconomicPrice>>('https://dulieu.dev/api/interest/vnexpress?limit=500', headers)
   ]);
 
+  const exchangeRows = exchange.data || [];
   const fuelRows = fuel.data || [];
   const interestRows = interest.data || [];
+  const exchangeDate = exchange.meta?.updated_at || exchangeRows[0]?.date;
   const fuelDate = fuel.meta?.updated_at || fuelRows[0]?.date;
   const interestDate = interest.meta?.updated_at || interestRows[0]?.date;
   const dateLabel = (value?: string) => value ? new Date(value).toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) : '';
 
   const lines = [
-    '⛽ Giá xăng dầu:',
-    ...fuelRows.slice(0, 6).map((row) => `⛽ ${row.fuel_type || 'Xăng dầu'}${row.zone ? ` (vùng ${row.zone})` : ''}: ${formatVnd(row.price)}/lít`),
-    ...(fuelDate ? [`   Cập nhật: ${dateLabel(fuelDate)}`] : []),
-    '🏦 Lãi suất tiết kiệm:',
-    ...formatInterestRates(interestRows),
-    ...(interestDate ? [`   Cập nhật: ${dateLabel(interestDate)}`] : [])
+    '━━━━━━━━━━━━━━',
+    '💱 TỶ GIÁ · VIETCOMBANK',
+    'Mua tiền mặt / chuyển khoản / bán (VND)',
+    ...formatExchangeRates(exchangeRows),
+    ...(exchangeDate ? [`🗓 ${dateLabel(exchangeDate)}`] : []),
+    '━━━━━━━━━━━━━━',
+    '⛽ GIÁ XĂNG',
+    ...formatFuelPrices(fuelRows),
+    ...(fuelDate ? [`🗓 ${dateLabel(fuelDate)}`] : []),
+    '━━━━━━━━━━━━━━',
+    ...formatTopBankRates(interestRows),
+    ...(interestDate ? [`🗓 ${dateLabel(interestDate)}`] : [])
   ];
-  if (!fuelRows.length && !interestRows.length) {
+  if (!exchangeRows.length && !fuelRows.length && !interestRows.length) {
     throw new Error('API không trả dữ liệu');
   }
   return lines;
 };
 
-const formatInterestRates = (rows: EconomicPrice[]): string[] => {
-  const banks = [...new Set(rows.map((row) => row.bank).filter((bank): bank is string => Boolean(bank)))];
-  return banks.flatMap((bankName) => {
-    const bankRows = rows.filter((row) => row.bank === bankName);
-    const rates = [...new Set(bankRows.map((row) => row.term_months).filter((term): term is number => term != null))]
-      .sort((a, b) => a - b)
-      .flatMap((term) => {
-        const row = bankRows.find((item) => item.term_months === term && item.deposit_rate != null);
-        return row?.deposit_rate != null ? [`${term}T ${row.deposit_rate}%`] : [];
-      });
-    return rates.length ? [`🏦 ${bankName}: ${rates.join(' · ')}`] : [];
+const formatExchangeRates = (rows: EconomicPrice[]): string[] => {
+  const currencies = [
+    { code: 'USD', flag: '🇺🇸' },
+    { code: 'EUR', flag: '🇪🇺' },
+    { code: 'CNY', flag: '🇨🇳' },
+    { code: 'JPY', flag: '🇯🇵' }
+  ];
+  return currencies.flatMap((currency) => {
+    const row = rows.find((item) => item.currency?.toUpperCase() === currency.code);
+    return row
+      ? [`${currency.flag} ${currency.code}  ${formatVnd(row.buy)} / ${formatVnd(row.transfer)} / ${formatVnd(row.sell)}`]
+      : [`${currency.flag} ${currency.code}  Chưa có dữ liệu`];
   });
 };
 
-const getCryptoLines = async (): Promise<string[]> => {
-  const data = await fetchJson<CryptoPriceResponse>(
-    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=vnd'
-  );
-  if (!data.bitcoin?.vnd && !data.ethereum?.vnd) {
-    throw new Error('API không trả dữ liệu');
-  }
+const formatFuelPrices = (rows: EconomicPrice[]): string[] => {
+  const fuelTypes = ['E5 RON 92', 'E10 RON 95-III'];
+  return fuelTypes.flatMap((fuelType) => {
+    const row = rows.find((item) => item.fuel_type?.toUpperCase().includes(fuelType));
+    return row
+      ? [`• ${fuelType}${row.zone ? ` · Vùng ${row.zone}` : ''}  ${formatVnd(row.price)}/lít`]
+      : [`• ${fuelType}  Chưa có dữ liệu`];
+  });
+};
+
+const formatTopBankRates = (rows: EconomicPrice[]): string[] => {
+  const topRates = new Map<string, number>();
+  rows.forEach((row) => {
+    if (row.term_months !== 12 || !row.bank || typeof row.deposit_rate !== 'number') {
+      return;
+    }
+    topRates.set(row.bank, Math.max(topRates.get(row.bank) ?? Number.NEGATIVE_INFINITY, row.deposit_rate));
+  });
+
+  const highestRates = [...topRates.entries()]
+    .sort(([, rateA], [, rateB]) => rateB - rateA)
+    .slice(0, 5);
+  const formatRate = new Intl.NumberFormat('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+
   return [
-    `₿ Bitcoin: ${formatVnd(data.bitcoin?.vnd)}`,
-    `♦ Ethereum (ETH): ${formatVnd(data.ethereum?.vnd)}`
+    '🏦 TOP 5 LÃI SUẤT · 12 THÁNG',
+    ...(highestRates.length
+      ? highestRates.map(([bank, rate], index) => `${['🥇', '🥈', '🥉', '4️⃣', '5️⃣'][index]} ${bank}  ${formatRate.format(rate)}%/năm`)
+      : ['Chưa có dữ liệu'])
   ];
 };
 
 export const getPriceMessage = async (): Promise<string> => {
   const apiKey = process.env.DULIEU_API_KEY;
-  const sections: string[] = [];
+  const today = new Date().toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+  const sections: string[] = [`📊 BẢNG GIÁ  ·  ${today}`];
   const failures: string[] = [];
 
   try {
@@ -146,23 +170,16 @@ export const getPriceMessage = async (): Promise<string> => {
       sections.push(...await getEconomicLines(apiKey));
     } catch (error) {
       console.error('DuLieu.dev API failed', error);
-      failures.push('xăng và lãi suất ngân hàng');
+      failures.push('tỷ giá, xăng và lãi suất ngân hàng');
     }
   } else {
-    failures.push('xăng và lãi suất ngân hàng (chưa cấu hình DULIEU_API_KEY)');
-  }
-
-  try {
-    sections.push(...await getCryptoLines());
-  } catch (error) {
-    console.error('Crypto price API failed', error);
-    failures.push('Bitcoin và ETH');
+    failures.push('tỷ giá, xăng và lãi suất ngân hàng (chưa cấu hình DULIEU_API_KEY)');
   }
 
   if (failures.length) {
     sections.push(`⚠️ Chưa lấy được: ${failures.join('; ')}.`);
   }
-  sections.push('\nNguồn: vang.today, DuLieu.dev, CoinGecko. Giá có thể không cập nhật theo thời gian thực.');
+  sections.push('\nNguồn: vang.today · Vietcombank · DuLieu.dev');
   return sections.join('\n');
 };
 
