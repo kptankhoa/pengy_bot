@@ -26,3 +26,7 @@ export const completeRequestConfig = {
 };
 
 export const webhookSecret = process.env.WEBHOOK_SECRET || '';
+
+export const blockedUserIds = new Set((process.env.BLOCKED_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean));
+
+export const blockedMessage = process.env.BLOCKED_MESSAGE || 'Bạn đã bị chặn sử dụng Pengy';

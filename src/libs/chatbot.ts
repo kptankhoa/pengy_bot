@@ -1,4 +1,4 @@
-import { STICKER_SET } from 'const/settings';
+import { STICKER_SET, blockedUserIds, blockedMessage } from 'const/settings';
 import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
 import { BOT_COMMAND, NOTI_GROUP_ID, pepeStickerMap } from 'const/chat';
@@ -102,6 +102,9 @@ export const handleUpdate = async (update: { message?: Message, callback_query?:
 };
 
 const run = async (msg: Message) => {
+  if (blockedUserIds.has(String(msg.from?.id))) {
+    return bot.sendMessage(msg.chat.id, blockedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
+  }
   const stopTyping = bot.startTyping(msg.chat.id);
   try {
     await processMessage(msg);
