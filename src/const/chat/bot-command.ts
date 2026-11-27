@@ -1,5 +1,6 @@
 export const BOT_COMMAND = {
   HELP: new RegExp("^/help(?:@[\\w_]+)?(?:\\s|$)"),
+  COMMANDS: new RegExp("^/commands(?:@[\\w_]+)?(?:\\s|$)"),
   RESET: new RegExp("^/z"),
   IMAGE: new RegExp("^/i +"),
   WEATHER: new RegExp("^/b +"),

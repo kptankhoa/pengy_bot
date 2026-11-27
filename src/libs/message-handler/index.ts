@@ -12,6 +12,7 @@ import { onPriceMessage } from './price-message-handler';
 import { onChatInfoMessage } from './chat-info-message-handler';
 import { onBanWordMessage } from './ban-word-message-handler';
 import { onHelpMessage } from './help-message-handler';
+import { onCommandsMessage } from './commands-message-handler';
 import { BOT_COMMAND } from 'const/chat';
 import { onBlocklistMessage } from './blocklist-message-handler';
 
@@ -20,6 +21,7 @@ type TextMessageHandler = (bot: any, msg: Message) => unknown;
 // Keep command matching and handler selection together so new text commands have one clear entry point.
 const textCommandHandlers: Array<[RegExp, TextMessageHandler]> = [
   [BOT_COMMAND.HELP, onHelpMessage],
+  [BOT_COMMAND.COMMANDS, onCommandsMessage],
   [BOT_COMMAND.RESET, onResetMessage],
   [BOT_COMMAND.IMAGE, onImageMessage],
   [BOT_COMMAND.WEATHER, onWeatherMessage],
