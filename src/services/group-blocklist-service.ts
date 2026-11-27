@@ -27,7 +27,14 @@ export const getGroupBlocklist = async (chatId: number): Promise<BlockedMember[]
 export const addGroupBlockedMember = async (chatId: number, member: BlockedMember): Promise<boolean> => {
   const members = await getGroupBlocklist(chatId);
   if (members.some(item => item.userId === member.userId)) return false;
-  const updatedMembers = [...members, member];
+  // Firestore rejects `undefined` fields. A user added by ID has no profile
+  // metadata, so only persist the fields that are actually available.
+  const normalizedMember: BlockedMember = {
+    userId: member.userId,
+    ...(member.name !== undefined ? { name: member.name } : {}),
+    ...(member.username !== undefined ? { username: member.username } : {})
+  };
+  const updatedMembers = [...members, normalizedMember];
   await setDoc(getBlocklistDoc(chatId), { members: updatedMembers });
   cache.set(chatId, { expiresAt: Date.now() + 30_000, members: updatedMembers });
   return true;
