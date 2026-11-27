@@ -9,5 +9,7 @@
   "observability": { "enabled": true },
   "vars": {
     "BLOCKED_USER_IDS": "8679896727",
+    "BANNED_KEYWORDS": "anime, alime",
+    "BANNED_MESSAGE": "Bạn đã bị khoá mõm 5p"
   }
 }
