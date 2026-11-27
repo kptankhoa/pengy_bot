@@ -1,15 +1,44 @@
 import { Message } from 'models';
-import { addGroupBlockedMember, getGroupBlocklist, removeGroupBlockedMember } from 'services';
+import {
+  addGroupBlockedMember,
+  getGroupBlocklist,
+  removeGroupBlockedMember,
+  updateGroupBlockedMember,
+} from 'services';
 import { BOT_COMMAND } from 'const/chat';
 
 const memberLabel = (member: { userId: number; name?: string; username?: string }) =>
   `${member.name || (member.username ? `@${member.username}` : 'Thành viên')} (${member.userId})`;
 
+const isEnabled = (value: boolean | undefined) => value !== false;
+
 const listOptions = (members: Awaited<ReturnType<typeof getGroupBlocklist>>) => ({
   inline_keyboard: [
-    ...members.map(member => [{ text: `🗑 ${member.name || member.username || member.userId}`, callback_data: `bl:rm:${member.userId}` }]),
+    ...members.map(member => [
+      { text: `⚙️ ${member.name || member.username || member.userId}`, callback_data: `bl:cfg:${member.userId}` },
+      { text: '🗑 Gỡ', callback_data: `bl:rm:${member.userId}` },
+    ]),
     [{ text: '➕ Thêm thành viên', callback_data: 'bl:add' }]
   ]
+});
+
+const memberSettings = (member: Awaited<ReturnType<typeof getGroupBlocklist>>[number]) => ({
+  text: `Cài đặt chặn cho ${memberLabel(member)}\n\n` +
+    `Từ khóa cấm: ${isEnabled(member.banOnBannedKeyword) ? 'bật — hạn chế 5 phút' : 'tắt'}\n` +
+    `Lệnh bot: ${isEnabled(member.blockCommands) ? 'bị chặn' : 'được phép'}`,
+  reply_markup: {
+    inline_keyboard: [
+      [{
+        text: `${isEnabled(member.banOnBannedKeyword) ? '🟢' : '⚪️'} Hạn chế 5 phút khi dùng từ khóa cấm`,
+        callback_data: `bl:toggle:${member.userId}:keyword`,
+      }],
+      [{
+        text: `${isEnabled(member.blockCommands) ? '🟢' : '⚪️'} Chặn dùng command`,
+        callback_data: `bl:toggle:${member.userId}:commands`,
+      }],
+      [{ text: '⬅️ Quay lại blocklist', callback_data: 'bl:list' }],
+    ],
+  },
 });
 
 export const isBlocklistCommand = (text: string) => BOT_COMMAND.BLOCKLIST.test(text);
@@ -49,7 +78,7 @@ export const onBlocklistMessage = async (bot: any, msg: Message) => {
 
   const members = await getGroupBlocklist(msg.chat.id);
   const text = members.length
-    ? `Blocklist nhóm (${members.length}):\n${members.map((member, index) => `${index + 1}. ${memberLabel(member)}`).join('\n')}\n\nChọn nút bên dưới để gỡ thành viên.`
+    ? `Blocklist nhóm (${members.length}):\n${members.map((member, index) => `${index + 1}. ${memberLabel(member)}`).join('\n')}\n\nBấm ⚙️ để chỉnh riêng cách chặn cho từng thành viên hoặc 🗑 để gỡ.`
     : 'Blocklist nhóm đang trống. Bấm nút để xem cách thêm thành viên.';
   return bot.sendMessage(msg.chat.id, text, {
     reply_to_message_id: msg.message_id,
@@ -89,10 +118,36 @@ export const onBlocklistCallback = async (bot: any, callback: {
   if (data === 'bl:list') {
     const members = await getGroupBlocklist(chatId);
     const text = members.length
-      ? `Blocklist nhóm (${members.length}):\n${members.map((item, index) => `${index + 1}. ${memberLabel(item)}`).join('\n')}\n\nChọn nút bên dưới để gỡ thành viên.`
+      ? `Blocklist nhóm (${members.length}):\n${members.map((item, index) => `${index + 1}. ${memberLabel(item)}`).join('\n')}\n\nBấm ⚙️ để chỉnh riêng cách chặn cho từng thành viên hoặc 🗑 để gỡ.`
       : 'Blocklist nhóm đang trống. Bấm nút để xem cách thêm thành viên.';
     await bot.answerCallbackQuery(callback.id);
     return bot.editMessageText(chatId, callback.message!.message_id, text, { reply_markup: listOptions(members) });
+  }
+
+  const settingsMatch = data.match(/^bl:cfg:(\d+)$/);
+  if (settingsMatch) {
+    const userId = Number(settingsMatch[1]);
+    const target = (await getGroupBlocklist(chatId)).find(item => item.userId === userId);
+    if (!target) return bot.answerCallbackQuery(callback.id, { text: 'Thành viên không còn trong blocklist.', show_alert: true });
+    await bot.answerCallbackQuery(callback.id);
+    const settings = memberSettings(target);
+    return bot.editMessageText(chatId, callback.message!.message_id, settings.text, settings);
+  }
+
+  const toggleMatch = data.match(/^bl:toggle:(\d+):(keyword|commands)$/);
+  if (toggleMatch) {
+    const userId = Number(toggleMatch[1]);
+    const target = (await getGroupBlocklist(chatId)).find(item => item.userId === userId);
+    if (!target) return bot.answerCallbackQuery(callback.id, { text: 'Thành viên không còn trong blocklist.', show_alert: true });
+    const setting = toggleMatch[2] === 'keyword' ? 'banOnBannedKeyword' : 'blockCommands';
+    const enabled = !isEnabled(target[setting]);
+    await updateGroupBlockedMember(chatId, userId, setting === 'banOnBannedKeyword'
+      ? { banOnBannedKeyword: enabled }
+      : { blockCommands: enabled });
+    const updated = (await getGroupBlocklist(chatId)).find(item => item.userId === userId)!;
+    await bot.answerCallbackQuery(callback.id, { text: 'Đã cập nhật cài đặt.' });
+    const settings = memberSettings(updated);
+    return bot.editMessageText(chatId, callback.message!.message_id, settings.text, settings);
   }
 
   const match = data.match(/^bl:rm:(\d+)$/);
@@ -101,7 +156,7 @@ export const onBlocklistCallback = async (bot: any, callback: {
   const removed = await removeGroupBlockedMember(chatId, userId);
   const members = await getGroupBlocklist(chatId);
   const text = members.length
-    ? `Blocklist nhóm (${members.length}):\n${members.map((item, index) => `${index + 1}. ${memberLabel(item)}`).join('\n')}\n\nChọn nút bên dưới để gỡ thành viên.`
+    ? `Blocklist nhóm (${members.length}):\n${members.map((item, index) => `${index + 1}. ${memberLabel(item)}`).join('\n')}\n\nBấm ⚙️ để chỉnh riêng cách chặn cho từng thành viên hoặc 🗑 để gỡ.`
     : 'Blocklist nhóm đang trống. Bấm nút để xem cách thêm thành viên.';
   await bot.answerCallbackQuery(callback.id, { text: removed ? 'Đã gỡ thành viên.' : 'Thành viên đã được gỡ trước đó.' });
   return bot.editMessageText(chatId, callback.message!.message_id, text, { reply_markup: listOptions(members) });

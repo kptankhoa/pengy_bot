@@ -141,7 +141,7 @@ export const handleBlockedUserMessage = async (
   if (!member) return false;
 
   const isBanWordCommand = BOT_COMMAND.BAN_WORD.test(msg.text);
-  if (msg.chat.type !== MessageType.PRIVATE && !isBanWordCommand) {
+  if (msg.chat.type !== MessageType.PRIVATE && !isBanWordCommand && member.banOnBannedKeyword !== false) {
     const containsBannedKeyword = (await getBannedKeywords())
       .some((word) => msg.text.toLowerCase().includes(word));
     if (containsBannedKeyword) {
@@ -157,13 +157,14 @@ export const handleBlockedUserMessage = async (
     }
   }
 
-  if (msg.text.startsWith('/')) {
+  if (member.blockCommands !== false && msg.text.startsWith('/')) {
     await bot.sendMessage(msg.chat.id, blockedMessage, {
       reply_to_message_id: msg.message_id,
       message_thread_id: msg.message_thread_id,
     });
+    return true;
   }
-  return true;
+  return member.blockCommands !== false;
 };
 
 // Timed mutes expire into text-only permissions; the cron may apply them up to a minute late.

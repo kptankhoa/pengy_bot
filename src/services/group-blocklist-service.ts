@@ -6,6 +6,8 @@ export interface BlockedMember {
   userId: number;
   name?: string;
   username?: string;
+  banOnBannedKeyword?: boolean;
+  blockCommands?: boolean;
 }
 
 const getBlocklistDoc = (chatId: number) => doc(db, collectionName.group_blocklists, String(chatId));
@@ -32,9 +34,28 @@ export const addGroupBlockedMember = async (chatId: number, member: BlockedMembe
   const normalizedMember: BlockedMember = {
     userId: member.userId,
     ...(member.name !== undefined ? { name: member.name } : {}),
-    ...(member.username !== undefined ? { username: member.username } : {})
+    ...(member.username !== undefined ? { username: member.username } : {}),
+    banOnBannedKeyword: member.banOnBannedKeyword ?? true,
+    blockCommands: member.blockCommands ?? true,
   };
   const updatedMembers = [...members, normalizedMember];
+  await setDoc(getBlocklistDoc(chatId), { members: updatedMembers });
+  cache.set(chatId, { expiresAt: Date.now() + 30_000, members: updatedMembers });
+  return true;
+};
+
+export const updateGroupBlockedMember = async (
+  chatId: number,
+  userId: number,
+  settings: Pick<BlockedMember, 'banOnBannedKeyword' | 'blockCommands'>,
+): Promise<boolean> => {
+  const members = await getGroupBlocklist(chatId);
+  const index = members.findIndex(member => member.userId === userId);
+  if (index < 0) return false;
+
+  const updatedMembers = members.map((member, memberIndex) =>
+    memberIndex === index ? { ...member, ...settings } : member,
+  );
   await setDoc(getBlocklistDoc(chatId), { members: updatedMembers });
   cache.set(chatId, { expiresAt: Date.now() + 30_000, members: updatedMembers });
   return true;
