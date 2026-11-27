@@ -31,8 +31,6 @@ export const blockedUserIds = new Set((process.env.BLOCKED_USER_IDS || '').split
 
 export const blockedMessage = process.env.BLOCKED_MESSAGE || 'Bạn đã bị chặn sử dụng Pengy';
 
-export const bannedKeywords = (process.env.BANNED_KEYWORDS || '').split(',').map(word => word.trim().toLowerCase()).filter(Boolean);
-
 export const bannedMessage = process.env.BANNED_MESSAGE || 'Nói bậy bị cấm chat 5 phút nha';
 
 export const banCommandUserIds = (process.env.BAN_COMMAND_USER_IDS || '').split(',').map(id => Number(id.trim())).filter(Boolean);

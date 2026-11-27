@@ -1,4 +1,5 @@
 export * from './chat-history-service';
+export * from './banned-keyword-service';
 export * from './chat-mode-service';
 export * from './chatbot-service';
 export * from './dictionary-service';

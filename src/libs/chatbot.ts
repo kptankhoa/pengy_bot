@@ -1,10 +1,10 @@
-import { STICKER_SET, blockedUserIds, blockedMessage, bannedKeywords, bannedMessage, banCommandUserIds, telegramToken } from 'const/settings';
+import { STICKER_SET, blockedUserIds, blockedMessage, bannedMessage, telegramToken, banCommandUserIds } from 'const/settings';
 import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
 import { BOT_COMMAND, NOTI_GROUP_ID, pepeStickerMap } from 'const/chat';
 import { Sticker } from 'models/sticker';
-import { checkChatIdExist, ensureChatConfig, loadChatConfigs, recordMute, takeDueMuteRestores } from 'libs/firebase';
-import { loadChatBots } from 'services';
+import { checkChatIdExist, clearMuteRestore, ensureChatConfig, loadChatConfigs, recordMute, takeDueMuteRestores } from 'libs/firebase';
+import { getBannedKeywords, loadChatBots } from 'services';
 import { createBot } from 'libs/telegram';
 import { cached } from 'utils/cache-util';
 
@@ -12,23 +12,33 @@ const bot = createBot();
 const MUTE_SECONDS = 5 * 60;
 const MUTED = Object.fromEntries(['messages', 'audios', 'documents', 'photos', 'videos', 'video_notes', 'voice_notes', 'polls', 'other_messages']
   .map((kind) => [`can_send_${kind}`, false]));
+const TEXT_ONLY = {
+  can_send_messages: true,
+  can_send_audios: false,
+  can_send_documents: false,
+  can_send_photos: false,
+  can_send_videos: false,
+  can_send_video_notes: false,
+  can_send_voice_notes: false,
+  can_send_polls: false,
+  can_send_other_messages: false,
+  can_add_web_page_previews: false,
+  can_change_info: false,
+  can_invite_users: false,
+  can_pin_messages: false,
+  can_manage_topics: false
+};
 
-// Fails (logged) if the bot isn't admin, the user is, or the user isn't in the chat. Telegram lifts the
-// mute at until_date; the minute cron then re-applies any per-user restrictions the mute overwrote.
+// Fails (logged) if the bot isn't admin, the user is, or the user isn't in the chat.
 const muteUser = (chatId: number, userId: number) => bot.getChatMember(chatId, userId)
-  .then((member) => recordMute(chatId, userId, member, Date.now() + MUTE_SECONDS * 1000))
+  .then(() => recordMute(chatId, userId, Date.now() + MUTE_SECONDS * 1000))
   .then(() => bot.restrictChatMember(chatId, userId, MUTED, Math.floor(Date.now() / 1000) + MUTE_SECONDS))
   .catch(console.error);
 
-// Restores take effect up to a minute late (cron granularity)
+// Timed mutes expire into text-only permissions; the cron may apply them up to a minute late.
 export const runMuteRestores = async () => {
   for (const { restore, done } of await takeDueMuteRestores()) {
-    // Original restriction already over: nothing to put back
-    if (restore.untilDate && restore.untilDate * 1000 <= Date.now()) {
-      await done();
-      continue;
-    }
-    await bot.restrictChatMember(restore.chatId, restore.userId, restore.permissions, restore.untilDate)
+    await bot.restrictChatMember(restore.chatId, restore.userId, TEXT_ONLY, 0)
       .then(done)
       .catch(console.error); // left in place, retried next minute
   }
@@ -98,6 +108,10 @@ const onTextMsg = (msg: Message) => {
     return messageHandler.onNote(msg);
   }
 
+  if (BOT_COMMAND.BAN_WORD.test(chatText)) {
+    return messageHandler.onBanWord(msg);
+  }
+
   return messageHandler.onNewMessage(msg);
 };
 
@@ -131,21 +145,38 @@ export const handleUpdate = async (update: { message?: Message, callback_query?:
 const run = async (msg: Message) => {
   console.log(`user ${msg.from?.id} (@${msg.from?.username || msg.from?.first_name}) in ${msg.chat.type} ${msg.chat.id}`);
   const lowerText = msg.text.toLowerCase();
-  if (msg.chat.type !== 'private' && msg.from?.id && bannedKeywords.some(word => lowerText.includes(word))) {
+  const isBlockedUser = blockedUserIds.has(String(msg.from?.id));
+  const isBanWordCommand = BOT_COMMAND.BAN_WORD.test(msg.text);
+  const isFreeCommand = BOT_COMMAND.FREE.test(msg.text);
+  if (msg.chat.type !== 'private' && isBlockedUser && msg.from?.id && !isBanWordCommand && !isFreeCommand && (await getBannedKeywords()).some(word => lowerText.includes(word))) {
     await muteUser(msg.chat.id, msg.from.id);
     return bot.sendMessage(msg.chat.id, bannedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
   }
+  if (isBlockedUser) {
+    return bot.sendMessage(msg.chat.id, blockedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
+  }
+  const isForBot = msg.chat.type === 'private' || msg.text.startsWith('/') || String(msg.reply_to_message?.from?.id) === botId;
   if (msg.chat.type !== 'private' && BOT_COMMAND.BAN.test(msg.text) && banCommandUserIds.length) {
     await Promise.all(banCommandUserIds.map((userId) => muteUser(msg.chat.id, userId)));
     return bot.sendMessage(msg.chat.id, bannedMessage, { message_thread_id: msg.message_thread_id });
   }
+  if (msg.chat.type !== 'private' && isFreeCommand) {
+    const results = await Promise.all([...blockedUserIds].map(async (userId) => {
+      try {
+        await bot.restrictChatMember(msg.chat.id, Number(userId), TEXT_ONLY, 0);
+        await clearMuteRestore(msg.chat.id, Number(userId));
+        return true;
+      } catch (error) {
+        console.error(`Failed to free blocked user ${userId} in chat ${msg.chat.id}`, error);
+        return false;
+      }
+    }));
+    const freedCount = results.filter(Boolean).length;
+    return bot.sendMessage(msg.chat.id, `Đã gỡ hạn chế cho ${freedCount}/${results.length} tài khoản trong nhóm này.`, { message_thread_id: msg.message_thread_id });
+  }
   // As admin the bot sees every group message; like privacy mode, only answer commands and replies to the bot
-  const isForBot = msg.text.startsWith('/') || String(msg.reply_to_message?.from?.id) === botId;
   if (msg.chat.type !== 'private' && !isForBot) {
     return;
-  }
-  if (blockedUserIds.has(String(msg.from?.id))) {
-    return bot.sendMessage(msg.chat.id, blockedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
   }
   const stopTyping = bot.startTyping(msg.chat.id);
   try {

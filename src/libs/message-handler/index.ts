@@ -10,6 +10,7 @@ import { onNoteMessage } from './note-message-handler';
 import { onSearchMessage } from './search-message-handler';
 import { onPriceMessage } from './price-message-handler';
 import { onChatInfoMessage } from './chat-info-message-handler';
+import { onBanWordMessage } from './ban-word-message-handler';
 
 export const getMessageHandler = (bot: any) => ({
   onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),
@@ -22,5 +23,6 @@ export const getMessageHandler = (bot: any) => ({
   onNote: (msg: Message) => onNoteMessage(bot, msg),
   onSearch: (msg: Message) => onSearchMessage(bot, msg),
   onPrice: (msg: Message) => onPriceMessage(bot, msg),
-  onChatInfo: (msg: Message) => onChatInfoMessage(bot, msg)
+  onChatInfo: (msg: Message) => onChatInfoMessage(bot, msg),
+  onBanWord: (msg: Message) => onBanWordMessage(bot, msg)
 });
