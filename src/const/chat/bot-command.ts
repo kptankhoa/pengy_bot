@@ -9,4 +9,5 @@ export const BOT_COMMAND = {
   PRICE: new RegExp('^/pr(?:@[\\w_]+)?(?:\\s|$)'),
   CHAT_INFO: new RegExp('^/ci(?:@[\\w_]+)?(?:\\s|$)'),
   NOTE: new RegExp('^/note'),
+  BAN: new RegExp('^/ban(?:@[\\w_]+)?(?:\\s|$)'),
 };

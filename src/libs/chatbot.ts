@@ -1,4 +1,4 @@
-import { STICKER_SET, blockedUserIds, blockedMessage, bannedKeywords, bannedMessage, telegramToken } from 'const/settings';
+import { STICKER_SET, blockedUserIds, blockedMessage, bannedKeywords, bannedMessage, banCommandUserIds, telegramToken } from 'const/settings';
 import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
 import { BOT_COMMAND, NOTI_GROUP_ID, pepeStickerMap } from 'const/chat';
@@ -134,6 +134,10 @@ const run = async (msg: Message) => {
   if (msg.chat.type !== 'private' && msg.from?.id && bannedKeywords.some(word => lowerText.includes(word))) {
     await muteUser(msg.chat.id, msg.from.id);
     return bot.sendMessage(msg.chat.id, bannedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
+  }
+  if (msg.chat.type !== 'private' && BOT_COMMAND.BAN.test(msg.text) && banCommandUserIds.length) {
+    await Promise.all(banCommandUserIds.map((userId) => muteUser(msg.chat.id, userId)));
+    return bot.sendMessage(msg.chat.id, bannedMessage, { message_thread_id: msg.message_thread_id });
   }
   // As admin the bot sees every group message; like privacy mode, only answer commands and replies to the bot
   const isForBot = msg.text.startsWith('/') || String(msg.reply_to_message?.from?.id) === botId;
