@@ -12,19 +12,29 @@ import { onPriceMessage } from './price-message-handler';
 import { onChatInfoMessage } from './chat-info-message-handler';
 import { onBanWordMessage } from './ban-word-message-handler';
 import { onHelpMessage } from './help-message-handler';
+import { BOT_COMMAND } from 'const/chat';
+import { onBlocklistMessage } from './blocklist-message-handler';
 
-export const getMessageHandler = (bot: any) => ({
-  onHelp: (msg: Message) => onHelpMessage(bot, msg),
-  onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),
-  onReset: (msg: Message) => onResetMessage(bot, msg),
-  onImage: (msg: Message) => onImageMessage(bot, msg),
-  onNews: (msg: Message) => onNewsMessage(bot, msg),
-  onWeather: (msg: Message) => onWeatherMessage(bot, msg),
-  onDictionary: (msg: Message) => onDictionaryMessage(bot, msg),
-  onFund: (msg: Message) => onFundMessage(bot, msg),
-  onNote: (msg: Message) => onNoteMessage(bot, msg),
-  onSearch: (msg: Message) => onSearchMessage(bot, msg),
-  onPrice: (msg: Message) => onPriceMessage(bot, msg),
-  onChatInfo: (msg: Message) => onChatInfoMessage(bot, msg),
-  onBanWord: (msg: Message) => onBanWordMessage(bot, msg)
-});
+type TextMessageHandler = (bot: any, msg: Message) => unknown;
+
+// Keep command matching and handler selection together so new text commands have one clear entry point.
+const textCommandHandlers: Array<[RegExp, TextMessageHandler]> = [
+  [BOT_COMMAND.HELP, onHelpMessage],
+  [BOT_COMMAND.RESET, onResetMessage],
+  [BOT_COMMAND.IMAGE, onImageMessage],
+  [BOT_COMMAND.WEATHER, onWeatherMessage],
+  [BOT_COMMAND.NEWS, onNewsMessage],
+  [BOT_COMMAND.SEARCH, onSearchMessage],
+  [BOT_COMMAND.DICT, onDictionaryMessage],
+  [BOT_COMMAND.FUND, onFundMessage],
+  [BOT_COMMAND.PRICE, onPriceMessage],
+  [BOT_COMMAND.CHAT_INFO, onChatInfoMessage],
+  [BOT_COMMAND.NOTE, onNoteMessage],
+  [BOT_COMMAND.BAN_WORD, onBanWordMessage],
+  [BOT_COMMAND.BLOCKLIST, onBlocklistMessage],
+];
+
+export const handleTextMessage = (bot: any, msg: Message) => {
+  const commandHandler = textCommandHandlers.find(([command]) => command.test(msg.text));
+  return commandHandler ? commandHandler[1](bot, msg) : onIncomingMessage(bot, msg);
+};
