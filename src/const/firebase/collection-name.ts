@@ -4,6 +4,7 @@ export const collectionName = {
   chat_config: 'chat_configs',
   other_config: 'other_configs',
   banned_keywords: 'banned_keywords',
+  group_blocklists: 'group_blocklists',
   chat_history: 'chat_histories',
   bot_reply_id_mode: 'bot_reply_id_mode',
   last_interaction_mode: 'last_interaction_mode',

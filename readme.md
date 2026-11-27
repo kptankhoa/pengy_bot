@@ -16,3 +16,5 @@ The bot runs as a Worker driven by a Telegram webhook (no polling).
 Local dev: copy the vars from `.env.example` into `.env` (gitignored), then run `npm run dev`.
 
 Use `/s <query>` in Telegram to search the web and get a Vietnamese answer with source links. The `/c` chatbot can also choose web search when it needs current information. Configure `TAVILY_API_KEY` in `.env` locally and as a Wrangler secret in production. Tavily's free plan currently includes 1,000 API credits per month.
+
+In a group, admins can manage that group's bot blocklist with `/blocklist`. Reply to a member's message with `/blocklist add` or use `/blocklist add <user_id>` to add them. The list shows inline remove buttons; `/blocklist remove <user_id>` also works. Members on the list cannot interact with the bot in that group. `/ban` restricts every member currently on that group's blocklist for five minutes; `/free` lifts those restrictions. Each group's list is stored separately in Firestore.

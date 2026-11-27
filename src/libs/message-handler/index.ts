@@ -11,8 +11,10 @@ import { onSearchMessage } from './search-message-handler';
 import { onPriceMessage } from './price-message-handler';
 import { onChatInfoMessage } from './chat-info-message-handler';
 import { onBanWordMessage } from './ban-word-message-handler';
+import { onHelpMessage } from './help-message-handler';
 
 export const getMessageHandler = (bot: any) => ({
+  onHelp: (msg: Message) => onHelpMessage(bot, msg),
   onNewMessage: (msg: Message) => onIncomingMessage(bot, msg),
   onReset: (msg: Message) => onResetMessage(bot, msg),
   onImage: (msg: Message) => onImageMessage(bot, msg),

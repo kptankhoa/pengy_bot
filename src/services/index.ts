@@ -2,6 +2,7 @@ export * from './chat-history-service';
 export * from './banned-keyword-service';
 export * from './chat-mode-service';
 export * from './chatbot-service';
+export * from './group-blocklist-service';
 export * from './dictionary-service';
 export * from './fund-service';
 export * from './note-service';

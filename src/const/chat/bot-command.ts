@@ -1,4 +1,5 @@
 export const BOT_COMMAND = {
+  HELP: new RegExp("^/help(?:@[\\w_]+)?(?:\\s|$)"),
   RESET: new RegExp("^/z"),
   IMAGE: new RegExp("^/i +"),
   WEATHER: new RegExp("^/b +"),
@@ -12,4 +13,5 @@ export const BOT_COMMAND = {
   BAN: new RegExp("^/ban(?:@[\\w_]+)?(?:\\s|$)"),
   FREE: new RegExp("^/free(?:@[\\w_]+)?(?:\\s|$)"),
   BAN_WORD: new RegExp("^/banword(?:@[\\w_]+)?(?:\\s|$)"),
+  BLOCKLIST: new RegExp("^/blocklist(?:@[\\w_]+)?(?:\\s|$)"),
 };

@@ -49,7 +49,9 @@ export const createBot = () => ({
   sendMessage,
   sendSticker: (chat_id: number, sticker: string, options = {}) => (stopTyping(chat_id), call('sendSticker', { chat_id, sticker, ...options })),
   startTyping,
-  answerCallbackQuery: (callback_query_id: string) => call('answerCallbackQuery', { callback_query_id }).catch(console.error),
+  answerCallbackQuery: (callback_query_id: string, options: Record<string, any> = {}) => call('answerCallbackQuery', { callback_query_id, ...options }).catch(console.error),
+  editMessageText: (chat_id: number, message_id: number, text: string, options: Record<string, any> = {}) =>
+    call('editMessageText', { chat_id, message_id, text, ...options }),
   deleteMessage: (chat_id: number, message_id: number) => call('deleteMessage', { chat_id, message_id }).catch(console.error),
   getStickerSet: (name: string) => call('getStickerSet', { name }),
   getChatMember: (chat_id: number, user_id: number) => call('getChatMember', { chat_id, user_id }),

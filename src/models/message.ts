@@ -19,7 +19,7 @@ export interface Message {
     message_thread_id?: number,
     reply_to_message?: {
         message_id: number,
-        from?: { id: number },
+        from?: { id: number; first_name?: string; username?: string },
     },
     text: string,
     photo: {
