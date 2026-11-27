@@ -1,4 +1,4 @@
-import { STICKER_SET, blockedUserIds, blockedMessage } from 'const/settings';
+import { STICKER_SET, blockedUserIds, blockedMessage, bannedKeywords, bannedMessage, telegramToken } from 'const/settings';
 import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
 import { BOT_COMMAND, NOTI_GROUP_ID, pepeStickerMap } from 'const/chat';
@@ -9,6 +9,8 @@ import { createBot } from 'libs/telegram';
 import { cached } from 'utils/cache-util';
 
 const bot = createBot();
+// Bot tokens are "<bot id>:<secret>"
+const botId = telegramToken.split(':')[0];
 
 const loadStickers = cached(async () => {
   const res = await bot.getStickerSet(STICKER_SET);
@@ -103,6 +105,17 @@ export const handleUpdate = async (update: { message?: Message, callback_query?:
 
 const run = async (msg: Message) => {
   console.log(`user ${msg.from?.id} (@${msg.from?.username || msg.from?.first_name}) in ${msg.chat.type} ${msg.chat.id}`);
+  const lowerText = msg.text.toLowerCase();
+  if (msg.chat.type !== 'private' && msg.from?.id && bannedKeywords.some(word => lowerText.includes(word))) {
+    // Telegram lifts the restriction itself at until_date; fails if the bot isn't admin or the user is
+    await bot.muteChatMember(msg.chat.id, msg.from.id, 5 * 60).catch(console.error);
+    return bot.sendMessage(msg.chat.id, bannedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
+  }
+  // As admin the bot sees every group message; like privacy mode, only answer commands and replies to the bot
+  const isForBot = msg.text.startsWith('/') || String(msg.reply_to_message?.from?.id) === botId;
+  if (msg.chat.type !== 'private' && !isForBot) {
+    return;
+  }
   if (blockedUserIds.has(String(msg.from?.id))) {
     return bot.sendMessage(msg.chat.id, blockedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
   }
