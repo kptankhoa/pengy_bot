@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
-  "triggers": { "crons": ["0 2,8 * * *"] },
+  "triggers": { "crons": ["0 2,8 * * *", "* * * * *"] },
   "ai": { "binding": "AI" },
   "observability": { "enabled": true },
   "vars": {

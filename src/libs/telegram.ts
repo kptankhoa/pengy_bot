@@ -52,9 +52,9 @@ export const createBot = () => ({
   answerCallbackQuery: (callback_query_id: string) => call('answerCallbackQuery', { callback_query_id }).catch(console.error),
   deleteMessage: (chat_id: number, message_id: number) => call('deleteMessage', { chat_id, message_id }).catch(console.error),
   getStickerSet: (name: string) => call('getStickerSet', { name }),
-  muteChatMember: (chat_id: number, user_id: number, seconds: number) => call('restrictChatMember', {
-    chat_id, user_id, until_date: Math.floor(Date.now() / 1000) + seconds, permissions: { can_send_messages: false }
-  }),
+  getChatMember: (chat_id: number, user_id: number) => call('getChatMember', { chat_id, user_id }),
+  restrictChatMember: (chat_id: number, user_id: number, permissions: Record<string, boolean>, until_date: number) =>
+    call('restrictChatMember', { chat_id, user_id, permissions, until_date, use_independent_chat_permissions: true }),
   sendPhoto: (chat_id: number, photo: Uint8Array, options: Record<string, any> = {}) => {
     stopTyping(chat_id);
     const form = new FormData();

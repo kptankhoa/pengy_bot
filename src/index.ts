@@ -1,4 +1,4 @@
-import { handleUpdate } from 'libs/chatbot';
+import { handleUpdate, runMuteRestores } from 'libs/chatbot';
 import { webhookSecret } from 'const/settings';
 import { PRICE_ALERT_CHAT_ID, PRICE_ALERT_TOPIC_ID } from 'const/chat';
 import { createBot } from 'libs/telegram';
@@ -17,7 +17,10 @@ export default {
     ctx.waitUntil(handleUpdate(update).catch(console.error));
     return new Response('ok');
   },
-  async scheduled(_controller: ScheduledController, _env: unknown, ctx: ExecutionContext) {
+  async scheduled(controller: ScheduledController, _env: unknown, ctx: ExecutionContext) {
+    if (controller.cron === '* * * * *') {
+      return ctx.waitUntil(runMuteRestores().catch(console.error));
+    }
     ctx.waitUntil(getPriceMessage()
       .then((message) => bot.sendMessage(PRICE_ALERT_CHAT_ID, message, { message_thread_id: PRICE_ALERT_TOPIC_ID }))
       .catch((error) => console.error('Daily price notification failed', error)));

@@ -3,12 +3,37 @@ import { Message } from 'models';
 import { getMessageHandler } from 'libs/message-handler';
 import { BOT_COMMAND, NOTI_GROUP_ID, pepeStickerMap } from 'const/chat';
 import { Sticker } from 'models/sticker';
-import { checkChatIdExist, ensureChatConfig, loadChatConfigs } from 'libs/firebase';
+import { checkChatIdExist, ensureChatConfig, loadChatConfigs, recordMute, takeDueMuteRestores } from 'libs/firebase';
 import { loadChatBots } from 'services';
 import { createBot } from 'libs/telegram';
 import { cached } from 'utils/cache-util';
 
 const bot = createBot();
+const MUTE_SECONDS = 5 * 60;
+const MUTED = Object.fromEntries(['messages', 'audios', 'documents', 'photos', 'videos', 'video_notes', 'voice_notes', 'polls', 'other_messages']
+  .map((kind) => [`can_send_${kind}`, false]));
+
+// Fails (logged) if the bot isn't admin, the user is, or the user isn't in the chat. Telegram lifts the
+// mute at until_date; the minute cron then re-applies any per-user restrictions the mute overwrote.
+const muteUser = (chatId: number, userId: number) => bot.getChatMember(chatId, userId)
+  .then((member) => recordMute(chatId, userId, member, Date.now() + MUTE_SECONDS * 1000))
+  .then(() => bot.restrictChatMember(chatId, userId, MUTED, Math.floor(Date.now() / 1000) + MUTE_SECONDS))
+  .catch(console.error);
+
+// Restores take effect up to a minute late (cron granularity)
+export const runMuteRestores = async () => {
+  for (const { restore, done } of await takeDueMuteRestores()) {
+    // Original restriction already over: nothing to put back
+    if (restore.untilDate && restore.untilDate * 1000 <= Date.now()) {
+      await done();
+      continue;
+    }
+    await bot.restrictChatMember(restore.chatId, restore.userId, restore.permissions, restore.untilDate)
+      .then(done)
+      .catch(console.error); // left in place, retried next minute
+  }
+};
+
 // Bot tokens are "<bot id>:<secret>"
 const botId = telegramToken.split(':')[0];
 
@@ -107,8 +132,7 @@ const run = async (msg: Message) => {
   console.log(`user ${msg.from?.id} (@${msg.from?.username || msg.from?.first_name}) in ${msg.chat.type} ${msg.chat.id}`);
   const lowerText = msg.text.toLowerCase();
   if (msg.chat.type !== 'private' && msg.from?.id && bannedKeywords.some(word => lowerText.includes(word))) {
-    // Telegram lifts the restriction itself at until_date; fails if the bot isn't admin or the user is
-    await bot.muteChatMember(msg.chat.id, msg.from.id, 5 * 60).catch(console.error);
+    await muteUser(msg.chat.id, msg.from.id);
     return bot.sendMessage(msg.chat.id, bannedMessage, { reply_to_message_id: msg.message_id, message_thread_id: msg.message_thread_id });
   }
   // As admin the bot sees every group message; like privacy mode, only answer commands and replies to the bot
