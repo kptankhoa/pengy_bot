@@ -44,7 +44,8 @@ const muteUser = (chatId: number, userId: number) =>
   bot
     .getChatMember(chatId, userId)
     .then(() => recordMute(chatId, userId, Date.now() + MUTE_SECONDS * 1000))
-    .then(() => bot.restrictChatMember(chatId, userId, MUTED, Math.floor(Date.now() / 1000) + MUTE_SECONDS))
+    // Keep the mute active until the scheduled restore applies TEXT_ONLY, matching /free.
+    .then(() => bot.restrictChatMember(chatId, userId, MUTED, 0))
     .then(() => true)
     .catch((error) => {
       console.error(error);
@@ -167,7 +168,7 @@ export const handleBlockedUserMessage = async (
   return member.blockCommands !== false;
 };
 
-// Timed mutes expire into text-only permissions; the cron may apply them up to a minute late.
+// Timed mutes stay active until the cron applies the same text-only permissions as /free.
 export const runMuteRestores = async () => {
   for (const { restore, done } of await takeDueMuteRestores()) {
     await bot.restrictChatMember(restore.chatId, restore.userId, TEXT_ONLY, 0).then(done).catch(console.error);
