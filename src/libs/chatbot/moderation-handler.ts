@@ -109,7 +109,7 @@ const freeBlocklistedUsers = async (msg: Message) => {
     .join(', ');
   return bot.sendMessage(
     msg.chat.id,
-    names ? `Bạn đã gỡ khóa mõm cho ${names}. Tiếp tục gáy đi đi nào!` : 'Không có thành viên nào được gỡ hạn chế.',
+    names ? `Bạn đã gỡ khóa mõm cho ${names}. Tiếp tục gáy đi nào!` : 'Không có thành viên nào được gỡ hạn chế.',
     { message_thread_id: msg.message_thread_id },
   );
 };
