@@ -3,8 +3,6 @@ import { blockedMessage } from 'const/settings';
 import { Message, MessageType } from 'models';
 import {
   clearMuteRestore,
-  getMuteRestore,
-  MuteRestore,
   recordMute,
   takeDueMuteRestores,
 } from 'libs/firebase';
@@ -22,18 +20,23 @@ const MUTED = Object.fromEntries(
     (kind) => [`can_send_${kind}`, false],
   ),
 );
-// Telegram: passing true for every permission lifts a member's restrictions (back to group defaults)
-const UNRESTRICTED = Object.fromEntries(
-  [...Object.keys(MUTED), 'can_add_web_page_previews', 'can_change_info', 'can_invite_users', 'can_pin_messages', 'can_manage_topics']
-    .map((key) => [key, true]),
-);
-
-// Re-apply the user's own pre-mute restrictions, or lift everything if they had none (or theirs has expired)
-const liftMute = (chatId: number, userId: number, restore?: MuteRestore) =>
-  // Older docs (text-only version) have no permissions saved
-  restore?.permissions && !(restore.untilDate && restore.untilDate * 1000 <= Date.now())
-    ? bot.restrictChatMember(chatId, userId, restore.permissions, restore.untilDate)
-    : bot.restrictChatMember(chatId, userId, UNRESTRICTED, 0);
+const TEXT_ONLY = {
+  can_send_messages: true,
+  can_send_audios: false,
+  can_send_documents: false,
+  can_send_photos: false,
+  can_send_videos: false,
+  can_send_video_notes: false,
+  can_send_voice_notes: false,
+  can_send_polls: false,
+  can_send_other_messages: false,
+  can_add_web_page_previews: false,
+  can_react_to_messages: false,
+  can_change_info: false,
+  can_invite_users: false,
+  can_pin_messages: false,
+  can_manage_topics: false,
+};
 
 const getBlocklistName = (member: { name?: string; username?: string; userId: number }) =>
   member.name || (member.username ? `@${member.username}` : String(member.userId));
@@ -41,9 +44,9 @@ const getBlocklistName = (member: { name?: string; username?: string; userId: nu
 const muteUser = (chatId: number, userId: number) =>
   bot
     .getChatMember(chatId, userId)
-    .then((member) => recordMute(chatId, userId, member, Date.now() + MUTE_SECONDS * 1000))
-    // With saved restrictions, mute without expiry so Telegram never lifts it to group defaults before the cron restores them
-    .then((pending) => bot.restrictChatMember(chatId, userId, MUTED, pending ? 0 : Math.floor(Date.now() / 1000) + MUTE_SECONDS))
+    .then(() => recordMute(chatId, userId, Date.now() + MUTE_SECONDS * 1000))
+    // Keep mute active until the cron applies TEXT_ONLY; Telegram must not restore group defaults itself.
+    .then(() => bot.restrictChatMember(chatId, userId, MUTED, 0))
     .then(() => true)
     .catch((error) => {
       console.error(error);
@@ -92,7 +95,7 @@ const freeBlocklistedUsers = async (msg: Message) => {
   const results = await Promise.all(
     members.map(async (member) => {
       try {
-        await liftMute(msg.chat.id, member.userId, await getMuteRestore(msg.chat.id, member.userId));
+        await bot.restrictChatMember(msg.chat.id, member.userId, TEXT_ONLY, 0);
         await clearMuteRestore(msg.chat.id, member.userId);
         return member;
       } catch (error) {
@@ -166,10 +169,10 @@ export const handleBlockedUserMessage = async (
   return member.blockCommands !== false;
 };
 
-// Lifts mutes of users who had their own restrictions; up to a minute late (cron granularity)
+// Restores users to text-only permissions; cron may apply this up to a minute late.
 export const runMuteRestores = async () => {
   for (const { restore, done } of await takeDueMuteRestores()) {
     // On failure the doc stays and is retried next minute
-    await liftMute(restore.chatId, restore.userId, restore).then(done).catch(console.error);
+    await bot.restrictChatMember(restore.chatId, restore.userId, TEXT_ONLY, 0).then(done).catch(console.error);
   }
 };
